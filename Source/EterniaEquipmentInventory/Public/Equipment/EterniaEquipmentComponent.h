@@ -1,0 +1,60 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "EquipmentSlot.h"
+#include "Components/ActorComponent.h"
+#include "Inventory/EterniaInventoryItemDefinition.h"
+#include "EterniaEquipmentComponent.generated.h"
+
+class UEquipmentSlot;
+class UEterniaInventoryEntry;
+class UEterniaInventoryWeaponDefinition;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipmentComponentOnSlotUpdatedDelegate, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, Item);
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class ETERNIAEQUIPMENTINVENTORY_API UEterniaEquipmentComponent : public UActorComponent {
+	GENERATED_BODY()
+
+public:
+
+	UEterniaEquipmentComponent();
+
+	bool TryEquipItem(UEterniaInventoryEntry* NewItem, UEquipmentSlot* Slot, bool ForceEquip);
+
+	bool TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool ForceEquip);
+
+	FORCEINLINE TArray<TObjectPtr<UEquipmentSlot>> GetSlots() const { return Slots; }
+
+	UFUNCTION(BlueprintCallable)
+	UEquipmentSlot* FindSlotByName(const FName& Name) const;
+
+	UFUNCTION(BlueprintCallable)
+	UEquipmentSlot* FindSlotByType(EEquipmentSlotType SlotType) const;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<UEquipmentSlot*> FindAllSlotsByType(EEquipmentSlotType SlotType) const;
+
+	UFUNCTION(BlueprintCallable)
+	UEquipmentSlot* FindSlotByInputAction(const UInputAction* InputAction) const;
+
+	void ClearSlot(UEquipmentSlot* EquipmentSlot);
+
+	FEquipmentComponentOnSlotUpdatedDelegate OnSlotUpdated;
+
+	UFUNCTION()
+	void NotifySlotUpdated(UEquipmentSlot* Slot, UEterniaInventoryEntry* Item);
+
+	virtual void BeginPlay() override;
+
+	bool ActivateSlotByInputAction(const UInputAction* InputAction);
+
+protected:
+
+	bool AreRequirementsMet(UEterniaInventoryItemDefinition* InventoryWeapon) const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced)
+	TArray<TObjectPtr<UEquipmentSlot>> Slots;
+};

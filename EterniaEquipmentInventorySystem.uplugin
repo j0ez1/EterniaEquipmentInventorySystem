@@ -1,0 +1,25 @@
+﻿{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.0.0",
+	"FriendlyName": "[Eternia] Equipment & Inventory System",
+	"Description": "Simple data-driven equipment & inventory system",
+	"Category": "Eternia Framework",
+	"CreatedBy": "j0ez",
+	"CreatedByURL": "j0ez1.github.io",
+	"DocsURL": "https://github.com/j0ez1/EterniaEquipmentInventorySystem",
+	"MarketplaceURL": "",
+	"EnabledByDefault": true,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "EterniaEquipmentInventory",
+			"Type": "Runtime",
+			"LoadingPhase": "PreLoadingScreen"
+		}
+	],
+	"Plugins": []
+}
