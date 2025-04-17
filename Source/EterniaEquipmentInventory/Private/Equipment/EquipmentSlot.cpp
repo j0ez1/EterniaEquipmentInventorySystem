@@ -8,16 +8,6 @@
 UEquipmentSlot::UEquipmentSlot() {
 }
 
-void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount) {
-	if (InventoryEntry == UpdatedItem) {
-		if (NewAmount <= 0) {
-			Clear();
-		} else {
-			OnEquippedItemChanged.Broadcast(this, nullptr);
-		}
-	}
-}
-
 bool UEquipmentSlot::TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
 	if (bIsBlocked) {
 		RemainingItem = NewItem;
@@ -94,4 +84,14 @@ bool UEquipmentSlot::DoSetItem(UEterniaInventoryEntry* NewItem) {
 		}
 	}
 	return false;
+}
+
+void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount) {
+	if (InventoryEntry == UpdatedItem) {
+		if (NewAmount <= 0) {
+			Clear();
+		} else {
+			OnEquippedItemChanged.Broadcast(this, nullptr);
+		}
+	}
 }

@@ -25,15 +25,8 @@ public:
 
 	UEquipmentSlot();
 
-	FORCEINLINE UEterniaInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
-
-	UFUNCTION()
-	void HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
-
 	UFUNCTION(BlueprintCallable)
 	bool TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
-
-	FORCEINLINE FName GetSlotName() const { return SlotName; }
 
 	UFUNCTION(BlueprintCallable)
 	bool IsValidForItemType(const FETItemType& ItemType) const;
@@ -44,24 +37,36 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UEterniaInventoryEntry* Clear();
 
-	UPROPERTY(BlueprintAssignable)
-	FOnEquippedItemChanged OnEquippedItemChanged;
+#pragma region GettersSetters
+
+	FORCEINLINE UEterniaInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
+
+	FORCEINLINE FName GetSlotName() const { return SlotName; }
 
 	FORCEINLINE UInputAction* GetInputAction() const { return InputAction; }
 
-	bool IsActivatable() const { return bIsActivatable; }
+	FORCEINLINE bool IsActivatable() const { return bIsActivatable; }
 
 	UFUNCTION(BlueprintCallable)
 	FETEquipmentSlot GetType() const;
 
 	UFUNCTION(BlueprintCallable)
-	bool IsBlocked() const { return bIsBlocked; }
+	FORCEINLINE bool IsBlocked() const { return bIsBlocked; }
 
 	UFUNCTION(BlueprintCallable)
 	void SetIsBlocked(bool InbIsBlocked);
 
+#pragma endregion
+
+#pragma region Delegates
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEquippedItemChanged OnEquippedItemChanged;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnIsBlockedChanged_EquipmentSlot OnIsBlockedChanged;
+
+#pragma endregion 
 
 protected:
 
@@ -84,4 +89,7 @@ protected:
 	UInputAction* InputAction;
 
 	bool DoSetItem(UEterniaInventoryEntry* NewItem);
+
+	UFUNCTION()
+	void HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
 };
