@@ -23,9 +23,9 @@ public:
 
 	UEterniaEquipmentComponent();
 
-	bool TryEquipItem(UEterniaInventoryEntry* NewItem, UEquipmentSlot* Slot, bool ForceEquip);
+	bool TryEquipItem(UEterniaInventoryEntry* NewItem, UEquipmentSlot* Slot, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
 
-	bool TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool ForceEquip);
+	bool TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
 
 	FORCEINLINE TArray<TObjectPtr<UEquipmentSlot>> GetSlots() const { return Slots; }
 
@@ -53,8 +53,6 @@ public:
 	bool ActivateSlotByInputAction(const UInputAction* InputAction);
 
 protected:
-
-	bool AreRequirementsMet(UEterniaInventoryItemDefinition* InventoryWeapon) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced)
 	TArray<TObjectPtr<UEquipmentSlot>> Slots;

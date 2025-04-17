@@ -30,14 +30,15 @@ public:
 	void HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
 
 	UFUNCTION(BlueprintCallable)
-	bool SetItem(UEterniaInventoryEntry* Item);
+	bool SetItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
 
 	FORCEINLINE FName GetSlotName() const { return SlotName; }
 
 	UFUNCTION(BlueprintCallable)
 	bool IsValidForItemType(const FETItemType& ItemType) const;
 
-	bool IsEmpty();
+	UFUNCTION(BlueprintCallable)
+	bool IsEmpty() const { return InventoryEntry == nullptr; }
 
 	UFUNCTION(BlueprintCallable)
 	void Clear();
@@ -70,4 +71,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bIsActivatable"))
 	UInputAction* InputAction;
+
+	bool DoSetItem(UEterniaInventoryEntry* NewItem);
 };

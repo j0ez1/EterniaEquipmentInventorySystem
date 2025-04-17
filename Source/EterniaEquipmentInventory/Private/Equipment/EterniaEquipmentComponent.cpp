@@ -4,8 +4,8 @@
 #include "Equipment/EterniaEquipmentComponent.h"
 
 #include "Equipment/EquipmentSlot.h"
+#include "Helpers/ETLogging.h"
 #include "Inventory/EterniaInventoryEntry.h"
-#include "Inventory/InventoryInterface.h"
 
 UEterniaEquipmentComponent::UEterniaEquipmentComponent() {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -71,47 +71,39 @@ bool UEterniaEquipmentComponent::ActivateSlotByInputAction(const UInputAction* I
 	return EquipmentSlot ? EquipmentSlot->ActivateItem(GetOwner()) : false;
 }
 
-bool UEterniaEquipmentComponent::AreRequirementsMet(UEterniaInventoryItemDefinition* InventoryWeapon) const {
-	return true;
-}
-
-bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* NewItem, UEquipmentSlot* Slot, bool ForceEquip) {
+bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* NewItem, UEquipmentSlot* Slot, bool bForceEquip,
+                                              UEterniaInventoryEntry*& RemainingItem) {
 	if (!NewItem || !Slot) return false;
 
-	UEterniaInventoryEntry* CurrentItemInSlot = Slot->GetInventoryEntry();
-	if (Slot->IsEmpty() || !CurrentItemInSlot->IsSameItem(NewItem) && ForceEquip) {
-		if (AreRequirementsMet(NewItem->GetDefinition())) {
-			bool bSuccess = Slot->SetItem(NewItem);
-			if (bSuccess && GetOwner()->Implements<UInventoryInterface>()) {
-				UETInventoryComponent* IC = IInventoryInterface::Execute_GetInventoryComponent(GetOwner());
-				NewItem->SetOwningInventoryComponent(IC);
+	if (!Slots.Contains(Slot)) {
+		EEIS_ULOGO_ERROR(TEXT("Tried to equip item to not owned slot"));
+		return false;
+	}
+
+	return Slot->SetItem(NewItem, bForceEquip, RemainingItem);
+}
+
+bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
+	if (InventoryEntry && InventoryEntry->GetDefinition()) {
+		TArray<UEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
+
+		// Try empty slots first regardless of bForceEquip ...
+		for (UEquipmentSlot* Slot : FoundSlots) {
+			if (Slot->IsEmpty()) {
+				if (TryEquipItem(InventoryEntry, Slot, bForceEquip, RemainingItem)) {
+					return true;
+				}
 			}
-			return bSuccess;
 		}
-	} else {
-		if (CurrentItemInSlot && CurrentItemInSlot->IsStackable() && CurrentItemInSlot->IsSameItem(NewItem)) {
-			int32 CurrentStackLimit = CurrentItemInSlot->GetStackLimit();
-			if (NewItem->GetAmount() <= CurrentStackLimit) {
-				CurrentItemInSlot->SetAmount(CurrentItemInSlot->GetAmount() + NewItem->GetAmount());
-				return true;
+
+		// ... then try occupied slots
+		for (UEquipmentSlot* Slot : FoundSlots) {
+			if (!Slot->IsEmpty()) {
+				if (TryEquipItem(InventoryEntry, Slot, bForceEquip, RemainingItem)) {
+					return true;
+				}
 			}
-			CurrentItemInSlot->SetAmount(CurrentItemInSlot->GetAmount() + CurrentStackLimit);
-			NewItem->SetAmount(NewItem->GetAmount() - CurrentStackLimit);
 		}
 	}
 	return false;
-}
-
-bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool ForceEquip) {
-	bool bResult = false;
-	if (InventoryEntry && InventoryEntry->GetDefinition()) {
-		TArray<UEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
-		for (UEquipmentSlot* Slot : FoundSlots) {
-			bResult = TryEquipItem(InventoryEntry, Slot, ForceEquip);
-			if (bResult) {
-				break;
-			}
-		}
-	}
-	return bResult;
 }

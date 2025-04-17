@@ -62,7 +62,7 @@ int32 UEterniaInventoryEntry::GetStackLimit() const {
 	if (!Definition->IsStackable()) {
 		return 0;
 	}
-	return Definition->GetStackSize() - GetAmount();
+	return FMath::Max(0, Definition->GetStackSize() - GetAmount());
 }
 
 void UEterniaInventoryEntry::Activate(AActor* ActivatorActor) {
