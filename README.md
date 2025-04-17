@@ -1,1 +1,1 @@
-# EterniaEquipmentInventorySystem
+# Eternia Equipment & Inventory System (EEIS)
