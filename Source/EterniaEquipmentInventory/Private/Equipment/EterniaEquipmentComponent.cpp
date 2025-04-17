@@ -4,11 +4,35 @@
 #include "Equipment/EterniaEquipmentComponent.h"
 
 #include "Equipment/EquipmentSlot.h"
-#include "Helpers/ETLogging.h"
 #include "Inventory/EterniaInventoryEntry.h"
 
 UEterniaEquipmentComponent::UEterniaEquipmentComponent() {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
+	if (InventoryEntry && InventoryEntry->GetDefinition()) {
+		TArray<UEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
+
+		// Try empty slots first regardless of bForceEquip ...
+		for (UEquipmentSlot* Slot : FoundSlots) {
+			if (Slot->IsEmpty()) {
+				if (Slot->TryEquipItem(InventoryEntry, bForceEquip, RemainingItem)) {
+					return true;
+				}
+			}
+		}
+
+		// ... then try occupied slots
+		for (UEquipmentSlot* Slot : FoundSlots) {
+			if (!Slot->IsEmpty()) {
+				if (Slot->TryEquipItem(InventoryEntry, bForceEquip, RemainingItem)) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByName(const FName& Name) const {
@@ -48,62 +72,66 @@ UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByInputAction(const UInputAc
 	return nullptr;
 }
 
-void UEterniaEquipmentComponent::ClearSlot(UEquipmentSlot* EquipmentSlot) {
-	if (EquipmentSlot) {
-		EquipmentSlot->Clear();
-	}
-}
-
-void UEterniaEquipmentComponent::NotifySlotUpdated(UEquipmentSlot* Slot, UEterniaInventoryEntry* Item) {
-	OnSlotUpdated.Broadcast(Slot, Item);
-}
-
 void UEterniaEquipmentComponent::BeginPlay() {
 	Super::BeginPlay();
 
 	for (auto Slot : Slots) {
-		Slot->OnEquippedItemChanged.AddDynamic(this, &UEterniaEquipmentComponent::NotifySlotUpdated);
+		Slot->OnEquippedItemChanged.AddDynamic(this, &UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot);
+		Slot->OnIsBlockedChanged.AddDynamic(this, &UEterniaEquipmentComponent::OnIsBlockedChanged_EquipmentSlot);
 	}
 }
 
-bool UEterniaEquipmentComponent::ActivateSlotByInputAction(const UInputAction* InputAction) {
-	UEquipmentSlot* EquipmentSlot = FindSlotByInputAction(InputAction);
-	return EquipmentSlot ? EquipmentSlot->ActivateItem(GetOwner()) : false;
-}
-
-bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* NewItem, UEquipmentSlot* Slot, bool bForceEquip,
-                                              UEterniaInventoryEntry*& RemainingItem) {
-	if (!NewItem || !Slot) return false;
-
-	if (!Slots.Contains(Slot)) {
-		EEIS_ULOGO_ERROR(TEXT("Tried to equip item to not owned slot"));
-		return false;
-	}
-
-	return Slot->SetItem(NewItem, bForceEquip, RemainingItem);
-}
-
-bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
-	if (InventoryEntry && InventoryEntry->GetDefinition()) {
-		TArray<UEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
-
-		// Try empty slots first regardless of bForceEquip ...
-		for (UEquipmentSlot* Slot : FoundSlots) {
-			if (Slot->IsEmpty()) {
-				if (TryEquipItem(InventoryEntry, Slot, bForceEquip, RemainingItem)) {
-					return true;
-				}
-			}
-		}
-
-		// ... then try occupied slots
-		for (UEquipmentSlot* Slot : FoundSlots) {
-			if (!Slot->IsEmpty()) {
-				if (TryEquipItem(InventoryEntry, Slot, bForceEquip, RemainingItem)) {
-					return true;
+void UEterniaEquipmentComponent::UpdateSlotBlockState() {
+	TMap<FName, int32> BlockedSlotTypesMap;
+	for (UEquipmentSlot* Slot : Slots) {
+		UEterniaInventoryEntry* OccupyingItem = Slot->GetInventoryEntry();
+		if (OccupyingItem && OccupyingItem->GetDefinition()) {
+			TArray<FETEquipmentSlot> SlotTypesToBlock = OccupyingItem->GetDefinition()->GetItemType().GetBlocksEquipmentSlotTypes();
+			for (const FETEquipmentSlot& SlotType : SlotTypesToBlock) {
+				if (BlockedSlotTypesMap.Contains(SlotType.Identifier)) {
+					BlockedSlotTypesMap[SlotType.Identifier]++;
+				} else {
+					BlockedSlotTypesMap.Add(SlotType.Identifier, 1);
 				}
 			}
 		}
 	}
-	return false;
+
+	for (UEquipmentSlot* Slot : Slots) {
+		if (Slot->IsEmpty()) {
+			if (BlockedSlotTypesMap.Contains(Slot->GetType().Identifier)) {
+				BlockedSlotTypesMap[Slot->GetType().Identifier]--;
+				if (BlockedSlotTypesMap[Slot->GetType().Identifier] <= 0) {
+					BlockedSlotTypesMap.Remove(Slot->GetType().Identifier);
+				}
+				Slot->SetIsBlocked(true);
+			} else {
+				Slot->SetIsBlocked(false);
+			}
+		}
+	}
+
+	for (UEquipmentSlot* Slot : Slots) {
+		if (!Slot->IsEmpty()) {
+			if (BlockedSlotTypesMap.Contains(Slot->GetType().Identifier)) {
+				BlockedSlotTypesMap[Slot->GetType().Identifier]--;
+				if (BlockedSlotTypesMap[Slot->GetType().Identifier] <= 0) {
+					BlockedSlotTypesMap.Remove(Slot->GetType().Identifier);
+				}
+				Slot->SetIsBlocked(true);
+			} else {
+				Slot->SetIsBlocked(false);
+			}
+		}
+	}
+}
+
+void UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UEquipmentSlot* Slot, UEterniaInventoryEntry* OldItem) {
+	UpdateSlotBlockState();
+}
+
+void UEterniaEquipmentComponent::OnIsBlockedChanged_EquipmentSlot(UEquipmentSlot* Slot) {
+	if (Slot && Slot->IsBlocked()) {
+		Slot->Clear();
+	}
 }

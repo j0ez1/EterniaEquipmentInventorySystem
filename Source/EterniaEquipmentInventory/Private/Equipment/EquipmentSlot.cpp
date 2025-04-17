@@ -13,12 +13,17 @@ void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem
 		if (NewAmount <= 0) {
 			Clear();
 		} else {
-			OnEquippedItemChanged.Broadcast(this, InventoryEntry);
+			OnEquippedItemChanged.Broadcast(this, nullptr);
 		}
 	}
 }
 
-bool UEquipmentSlot::SetItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
+bool UEquipmentSlot::TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
+	if (bIsBlocked) {
+		RemainingItem = NewItem;
+		return false;
+	}
+
 	UEterniaInventoryEntry* OccupyingItem = InventoryEntry;
 	if (IsEmpty() || !InventoryEntry->IsSameItem(NewItem) && bForceEquip) {
 		bool bSuccess = DoSetItem(NewItem);
@@ -50,20 +55,14 @@ bool UEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
 	return false;
 }
 
-void UEquipmentSlot::Clear() {
+UEterniaInventoryEntry* UEquipmentSlot::Clear() {
+	UEterniaInventoryEntry* OldItem = InventoryEntry;
 	if (InventoryEntry) {
 		InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
 	}
 	InventoryEntry = nullptr;
-	OnEquippedItemChanged.Broadcast(this, InventoryEntry);
-}
-
-bool UEquipmentSlot::ActivateItem(AActor* ActivatorActor) {
-	if (bIsActivatable && InventoryEntry) {
-		InventoryEntry->Activate(ActivatorActor);
-		return true;
-	}
-	return false;
+	OnEquippedItemChanged.Broadcast(this, OldItem);
+	return OldItem;
 }
 
 FETEquipmentSlot UEquipmentSlot::GetType() const {
@@ -74,15 +73,23 @@ FETEquipmentSlot UEquipmentSlot::GetType() const {
 	return FETEquipmentSlot();
 }
 
+void UEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
+	if (bIsBlocked == InbIsBlocked) return;
+
+	bIsBlocked = InbIsBlocked;
+	OnIsBlockedChanged.Broadcast(this);
+}
+
 bool UEquipmentSlot::DoSetItem(UEterniaInventoryEntry* NewItem) {
 	if (NewItem && NewItem != InventoryEntry && NewItem->GetDefinition()) {
 		if (IsValidForItemType(NewItem->GetDefinition()->GetItemType())) {
+			UEterniaInventoryEntry* OldItem = InventoryEntry;
 			if (InventoryEntry) {
 				InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
 			}
 			InventoryEntry = NewItem;
 			InventoryEntry->OnItemAmountChanged.AddUniqueDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
-			OnEquippedItemChanged.Broadcast(this, NewItem);
+			OnEquippedItemChanged.Broadcast(this, OldItem);
 			return true;
 		}
 	}

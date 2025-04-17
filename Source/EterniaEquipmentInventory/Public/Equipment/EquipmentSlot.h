@@ -11,7 +11,8 @@ class IAbilitySystemInterface;
 class UInputAction;
 class UEterniaInventoryEntry;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquippedItemChanged, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquippedItemChanged, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, OldItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UEquipmentSlot*, Slot);
 
 /**
  * 
@@ -30,7 +31,7 @@ public:
 	void HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
 
 	UFUNCTION(BlueprintCallable)
-	bool SetItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
+	bool TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
 
 	FORCEINLINE FName GetSlotName() const { return SlotName; }
 
@@ -41,9 +42,7 @@ public:
 	bool IsEmpty() const { return InventoryEntry == nullptr; }
 
 	UFUNCTION(BlueprintCallable)
-	void Clear();
-
-	bool ActivateItem(AActor* ActivatorActor);
+	UEterniaInventoryEntry* Clear();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnEquippedItemChanged OnEquippedItemChanged;
@@ -54,6 +53,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FETEquipmentSlot GetType() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsBlocked() const { return bIsBlocked; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsBlocked(bool InbIsBlocked);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnIsBlockedChanged_EquipmentSlot OnIsBlockedChanged;
 
 protected:
 
@@ -68,6 +76,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bIsActivatable = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsBlocked = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bIsActivatable"))
 	UInputAction* InputAction;
