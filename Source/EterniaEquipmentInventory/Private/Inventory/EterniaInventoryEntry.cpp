@@ -7,7 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
 #include "Inventory/ETInventoryComponent.h"
-#include "Inventory/EterniaInventoryItemDefinition.h"
+#include "Data/EterniaInventoryItemDefinition.h"
 #include "Inventory/ETInventoryStatics.h"
 
 

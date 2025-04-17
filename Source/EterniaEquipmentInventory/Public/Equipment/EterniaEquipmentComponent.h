@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "EquipmentSlot.h"
 #include "Components/ActorComponent.h"
-#include "Inventory/EterniaInventoryItemDefinition.h"
+#include "Data/EquipmentTypes.h"
 #include "EterniaEquipmentComponent.generated.h"
 
+class UEterniaInventoryItemDefinition;
 class UEquipmentSlot;
 class UEterniaInventoryEntry;
 class UEterniaInventoryWeaponDefinition;
@@ -32,10 +33,10 @@ public:
 	UEquipmentSlot* FindSlotByName(const FName& Name) const;
 
 	UFUNCTION(BlueprintCallable)
-	UEquipmentSlot* FindSlotByType(EEquipmentSlotType SlotType) const;
+	UEquipmentSlot* FindSlotByType(const FETEquipmentSlot& SlotType) const;
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UEquipmentSlot*> FindAllSlotsByType(EEquipmentSlotType SlotType) const;
+	TArray<UEquipmentSlot*> FindAllValidSlotsForItemType(const FETItemType& ItemType) const;
 
 	UFUNCTION(BlueprintCallable)
 	UEquipmentSlot* FindSlotByInputAction(const UInputAction* InputAction) const;

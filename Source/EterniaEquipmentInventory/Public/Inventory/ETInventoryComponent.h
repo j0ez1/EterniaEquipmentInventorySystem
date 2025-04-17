@@ -63,8 +63,6 @@ public:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	bool TryAddItem(AActor* ItemToAdd);
-
 	UFUNCTION(BlueprintCallable)
 	bool TryAddItem(UEterniaInventoryEntry* ItemToAdd);
 

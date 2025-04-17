@@ -3,7 +3,6 @@
 
 #include "Equipment/EterniaEquipmentComponent.h"
 
-#include "Equipment/EquipmentBlueprintLibrary.h"
 #include "Equipment/EquipmentSlot.h"
 #include "Inventory/EterniaInventoryEntry.h"
 #include "Inventory/InventoryInterface.h"
@@ -21,19 +20,19 @@ UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByName(const FName& Name) co
 	return nullptr;
 }
 
-UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByType(EEquipmentSlotType SlotType) const {
+UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByType(const FETEquipmentSlot& SlotType) const {
 	for (auto EquipmentSlot : Slots) {
-		if (EquipmentSlot->GetSlotType() == SlotType) {
+		if (EquipmentSlot->GetType() == SlotType) {
 			return EquipmentSlot;
 		}
 	}
 	return nullptr;
 }
 
-TArray<UEquipmentSlot*> UEterniaEquipmentComponent::FindAllSlotsByType(EEquipmentSlotType SlotType) const {
+TArray<UEquipmentSlot*> UEterniaEquipmentComponent::FindAllValidSlotsForItemType(const FETItemType& ItemType) const {
 	TArray<UEquipmentSlot*> ResultArray;
 	for (auto EquipmentSlot : Slots) {
-		if (EquipmentSlot->GetSlotType() == SlotType) {
+		if (EquipmentSlot->IsValidForItemType(ItemType)) {
 			ResultArray.Add(EquipmentSlot);
 		}
 	}
@@ -106,7 +105,7 @@ bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* NewItem, U
 bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool ForceEquip) {
 	bool bResult = false;
 	if (InventoryEntry && InventoryEntry->GetDefinition()) {
-		TArray<UEquipmentSlot*> FoundSlots = FindAllSlotsByType(UEquipmentBlueprintLibrary::GetSlotType(InventoryEntry->GetDefinition()->GetEquipType()));
+		TArray<UEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
 		for (UEquipmentSlot* Slot : FoundSlots) {
 			bResult = TryEquipItem(InventoryEntry, Slot, ForceEquip);
 			if (bResult) {

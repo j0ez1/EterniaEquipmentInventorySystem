@@ -6,7 +6,7 @@
 #include "ETEquipmentInventorySubsystem.h"
 #include "Helpers/ETLogging.h"
 #include "Inventory/EterniaInventoryEntry.h"
-#include "Inventory/EterniaInventoryItemDefinition.h"
+#include "Data/EterniaInventoryItemDefinition.h"
 #include "Inventory/ETInventoryComponent.h"
 
 UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass) {

@@ -3,19 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EquipmentTypes.h"
 #include "EterniaInventoryItemDefinition.generated.h"
 
 class UGameplayEffect;
-
-UENUM(BlueprintType)
-enum EEquipType : uint8 {
-	EET_Primary UMETA(DisplayName="Primary"),
-	EET_Aux UMETA(DisplayName="Aux"),
-	EET_TwoHanded UMETA(DisplayName="TwoHanded"),
-	EET_Consumable UMETA(DisplayName="Consumable"),
-	EET_NotEquippable UMETA(DisplayName="Not Equippable"),
-	EET_MAX UMETA(DisplayName="Invalid")
-};
 
 USTRUCT()
 struct FEtItemDefinition : public FTableRowBase {
@@ -28,10 +19,7 @@ struct FEtItemDefinition : public FTableRowBase {
 	FText ItemName;
 
 	UPROPERTY(EditAnywhere)
-	FName Category;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> Representation;
+	TSubclassOf<AActor> Representation; // TODO Remove
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMesh> DraggableRepresentation;
@@ -57,8 +45,8 @@ struct FEtItemDefinition : public FTableRowBase {
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "Stackable"))
 	int32 StackSize = 0;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TEnumAsByte<EEquipType> EquipType = TEnumAsByte<EEquipType>();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(RequiredAssetDataTags="RowStructure=/Script/EterniaEquipmentInventory.ETItemType"))
+	FDataTableRowHandle ItemType;
 
 	UPROPERTY(EditAnywhere)
 	bool Consumable = false;
@@ -68,8 +56,6 @@ struct FEtItemDefinition : public FTableRowBase {
 
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "Consumable"))
 	FName ConsumeReplaceItemID;
-
-	FORCEINLINE bool IsEquippable() const { return EquipType != EET_MAX; }
 
 };
 
@@ -107,10 +93,7 @@ public:
 
 	FORCEINLINE int32 GetStackSize() const { return StackSize; }
 
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool IsEquippable() const { return EquipType != EET_MAX && EquipType != EET_NotEquippable; }
-
-	FORCEINLINE TEnumAsByte<EEquipType> GetEquipType() const { return EquipType; }
+	FETItemType GetItemType() const;
 
 	FORCEINLINE bool IsConsumable() const { return Consumable; }
 
@@ -122,7 +105,7 @@ public:
 		UEterniaInventoryItemDefinition* Result = NewObject<UEterniaInventoryItemDefinition>();
 		Result->ItemID = DTDef.ItemID;
 		Result->ItemName = DTDef.ItemName;
-		Result->Category = DTDef.Category;
+		Result->ItemTypeRowHandle = DTDef.ItemType;
 		Result->Representation = DTDef.Representation;
 		Result->DraggableRepresentation = DTDef.DraggableRepresentation;
 		Result->Description = DTDef.Description;
@@ -132,7 +115,6 @@ public:
 		Result->Dimensions = DTDef.Dimensions;
 		Result->Stackable = DTDef.Stackable;
 		Result->StackSize = DTDef.StackSize;
-		Result->EquipType = DTDef.EquipType;
 		Result->Consumable = DTDef.Consumable;
 		Result->ConsumeEffect = DTDef.ConsumeEffect;
 		Result->ConsumeReplaceItemID = DTDef.ConsumeReplaceItemID;
@@ -147,8 +129,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText ItemName;
 
-	UPROPERTY(EditAnywhere)
-	FName Category;
+	UPROPERTY()
+	FDataTableRowHandle ItemTypeRowHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintGetter=GetRepresentation)
 	TSubclassOf<AActor> Representation;
@@ -176,9 +158,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	int32 StackSize;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TEnumAsByte<EEquipType> EquipType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool Consumable;

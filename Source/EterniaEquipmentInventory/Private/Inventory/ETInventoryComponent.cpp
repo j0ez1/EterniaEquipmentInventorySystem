@@ -6,7 +6,7 @@
 #include "Combination/ETCombinationBlueprintLibrary.h"
 #include "Helpers/ETLogging.h"
 #include "Inventory/EterniaInventoryEntry.h"
-#include "Inventory/EterniaInventoryItemDefinition.h"
+#include "Data/EterniaInventoryItemDefinition.h"
 #include "Inventory/ETInventoryStatics.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
@@ -19,18 +19,6 @@ void UETInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
 
 	Inventory.Empty();
-}
-
-bool UETInventoryComponent::TryAddItem(AActor* ItemToAdd) {
-	if (!ItemToAdd) {
-		EEIS_ULOG_ERROR(TEXT("Item to add is null"))
-		return false;
-	}
-
-	UEterniaInventoryItemDefinition* FoundItemDef = UETInventoryStatics::FindItemDefinitionByRepresentation(this, ItemToAdd->GetClass());
-
-	UEterniaInventoryEntry* InventoryItemToAdd = UETInventoryStatics::CreateItemByDefinition(FoundItemDef, this);
-	return TryAddItem(InventoryItemToAdd);
 }
 
 bool UETInventoryComponent::TryAddItem(UEterniaInventoryEntry* ItemToAdd) {
@@ -267,8 +255,11 @@ bool UETInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UEterniaIn
 
 UEterniaInventoryEntry* UETInventoryComponent::CreateItemByDefinition(const FInventoryItem& ItemDef, UETInventoryComponent* OwningInventoryComponent) {
 	FEtItemDefinition* FoundItemDef = ItemDef.Definition.GetRow<FEtItemDefinition>("");
-	UEterniaInventoryItemDefinition* Definition = UEterniaInventoryItemDefinition::Convert(*FoundItemDef);
-	return UETInventoryStatics::CreateItemByDefinition(Definition, OwningInventoryComponent, ItemDef.Amount);
+	if (FoundItemDef) {
+		UEterniaInventoryItemDefinition* Definition = UEterniaInventoryItemDefinition::Convert(*FoundItemDef);
+		return UETInventoryStatics::CreateItemByDefinition(Definition, OwningInventoryComponent, ItemDef.Amount);	
+	}
+	return nullptr;
 }
 
 void UETInventoryComponent::AddItemAt(UEterniaInventoryEntry* Item, int32 TopLeftIndex) {

@@ -3,13 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EquipmentTypes.h"
+#include "Data/EquipmentTypes.h"
 #include "UObject/Object.h"
 #include "EquipmentSlot.generated.h"
 
 class IAbilitySystemInterface;
 class UInputAction;
-enum EEquipType : uint8;
 class UEterniaInventoryEntry;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquippedItemChanged, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, Item);
@@ -25,8 +24,6 @@ public:
 
 	UEquipmentSlot();
 
-	void Init(EEquipmentSlotType Type);
-
 	FORCEINLINE UEterniaInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
 
 	UFUNCTION()
@@ -38,10 +35,7 @@ public:
 	FORCEINLINE FName GetSlotName() const { return SlotName; }
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TEnumAsByte<EEquipmentSlotType> GetSlotType() const { return SlotType; }
-
-	UFUNCTION(BlueprintCallable)
-	bool IsValidForType(EEquipType Equip) const;
+	bool IsValidForItemType(const FETItemType& ItemType) const;
 
 	bool IsEmpty();
 
@@ -57,6 +51,9 @@ public:
 
 	bool IsActivatable() const { return bIsActivatable; }
 
+	UFUNCTION(BlueprintCallable)
+	FETEquipmentSlot GetType() const;
+
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
@@ -65,8 +62,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	FName SlotName;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TEnumAsByte<EEquipmentSlotType> SlotType;
+	UPROPERTY(EditDefaultsOnly, meta=(RequiredAssetDataTags="RowStructure=/Script/EterniaEquipmentInventory.ETEquipmentSlot"))
+	FDataTableRowHandle SlotTypeRowHandle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bIsActivatable = false;

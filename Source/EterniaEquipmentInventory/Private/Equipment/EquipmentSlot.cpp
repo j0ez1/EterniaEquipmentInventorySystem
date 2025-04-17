@@ -3,19 +3,9 @@
 
 #include "Equipment/EquipmentSlot.h"
 
-#include "Equipment/EquipmentBlueprintLibrary.h"
 #include "Inventory/EterniaInventoryEntry.h"
 
-bool UEquipmentSlot::IsValidForType(EEquipType EquipType) const {
-	return UEquipmentBlueprintLibrary::GetSlotType(EquipType) == GetSlotType();
-}
-
 UEquipmentSlot::UEquipmentSlot() {
-}
-
-void UEquipmentSlot::Init(EEquipmentSlotType Type) {
-	SlotType = Type;
-	Clear();
 }
 
 void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount) {
@@ -29,15 +19,24 @@ void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem
 }
 
 bool UEquipmentSlot::SetItem(UEterniaInventoryEntry* Item) {
-	if (Item && Item != InventoryEntry && Item->GetDefinition() && Item->GetDefinition()->IsEquippable()) {
-		EEquipType EquipType = Item->GetDefinition()->GetEquipType();
-		if (IsValidForType(EquipType)) {
+	if (Item && Item != InventoryEntry && Item->GetDefinition()) {
+		if (IsValidForItemType(Item->GetDefinition()->GetItemType())) {
 			if (InventoryEntry) {
 				InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
 			}
 			InventoryEntry = Item;
 			InventoryEntry->OnItemAmountChanged.AddDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
 			OnEquippedItemChanged.Broadcast(this, Item);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
+	FETEquipmentSlot Type = GetType();
+	for (FETEquipmentSlot ValidType : ItemType.GetValidEquipmentSlotTypes()) {
+		if (ValidType == Type) {
 			return true;
 		}
 	}
@@ -62,4 +61,12 @@ bool UEquipmentSlot::ActivateItem(AActor* ActivatorActor) {
 		return true;
 	}
 	return false;
+}
+
+FETEquipmentSlot UEquipmentSlot::GetType() const {
+	FETEquipmentSlot* Row = SlotTypeRowHandle.GetRow<FETEquipmentSlot>("");
+	if (Row) {
+		return *Row;
+	}
+	return FETEquipmentSlot();
 }

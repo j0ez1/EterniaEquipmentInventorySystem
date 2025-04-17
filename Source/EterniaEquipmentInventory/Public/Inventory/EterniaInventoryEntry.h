@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EterniaInventoryItemDefinition.h"
+#include "Data/EterniaInventoryItemDefinition.h"
 #include "UObject/Object.h"
 #include "EterniaInventoryEntry.generated.h"
 
@@ -13,7 +13,7 @@ class UETInventoryComponent;
 class UEterniaInventoryItemDefinition;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UEterniaInventoryEntry*, UpdatedItem, int32, NewAmount);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UEterniaInventoryEntry*)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UEterniaInventoryEntry*, Item);
 
 /**
  * 
@@ -47,6 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Rotate();
 
+	UPROPERTY(BlueprintAssignable)
 	FOnItemRotated_InventoryEntry OnItemRotated;
 
 	UFUNCTION(BlueprintCallable)
