@@ -26,24 +26,21 @@ UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepres
 }
 
 UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByID(UObject* WorldContextObject, FName ItemID) {
-	UDataTable* ItemDataTable = GetItemDataTable(WorldContextObject);
-	if (ItemDataTable) {
-		TArray<FEtItemDefinition*> OutRowArray;
-		ItemDataTable->GetAllRows<FEtItemDefinition>("", OutRowArray);
-		for (FEtItemDefinition* Definition : OutRowArray) {
-			if (Definition && Definition->ItemID == ItemID) {
-				return UEterniaInventoryItemDefinition::Convert(*Definition);
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (World) {
+		UGameInstance* GameInstance = World->GetGameInstance();
+		if (GameInstance) {
+			if (UETEquipmentInventorySubsystem* Subsystem = GameInstance->GetSubsystem<UETEquipmentInventorySubsystem>()) {
+				return Subsystem->FindItemDefinitionById(ItemID);
 			}
 		}
-	} else {
-		EEIS_ULOGS_ERROR(TEXT("Item DataTable is null"))
 	}
 	return nullptr;
 }
 
 UEterniaInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UEterniaInventoryItemDefinition* Definition,
-																		  UETInventoryComponent* OwningInventoryComponent,
-																		  int32 Amount) {
+                                                                    UETInventoryComponent* OwningInventoryComponent,
+                                                                    int32 Amount) {
 	if (Definition) {
 		UEterniaInventoryEntry* NewItem = NewObject<UEterniaInventoryEntry>(OwningInventoryComponent);
 		NewItem->SetAmount(Amount);
@@ -56,8 +53,5 @@ UEterniaInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UEterniaInve
 
 UDataTable* UETInventoryStatics::GetItemDataTable(UObject* WorldContextObject) {
 	UETEquipmentInventorySubsystem* Subsystem = UETEquipmentInventorySubsystem::GetCurrent(WorldContextObject);
-	if (Subsystem) {
-		return Subsystem->GetItemDatabase();
-	}
-	return nullptr;
+	return Subsystem ? Subsystem->GetItemDatabase() : nullptr;
 }

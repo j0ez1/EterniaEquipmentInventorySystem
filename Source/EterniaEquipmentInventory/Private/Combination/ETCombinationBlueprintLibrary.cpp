@@ -11,7 +11,9 @@ bool UETCombinationBlueprintLibrary::CanCombineItems(UObject* WorldContextObject
                                                      UEterniaInventoryEntry* ItemToCombineWith,
                                                      FCombinationResult& CombinationResult) {
 	if (InitiatorItem != nullptr && ItemToCombineWith != nullptr) {
-		return CanCombine(WorldContextObject, InitiatorItem->GetDefinition()->GetItemID(), ItemToCombineWith->GetDefinition()->GetItemID(), CombinationResult);
+		const FName CombinatorId = InitiatorItem->GetDefinition()->GetItemID();
+		const FName CombineableId = ItemToCombineWith->GetDefinition()->GetItemID();
+		return CanCombine(WorldContextObject, CombinatorId, CombineableId, CombinationResult);
 	}
 	return false;
 }
@@ -20,14 +22,22 @@ bool UETCombinationBlueprintLibrary::CanCombine(UObject* WorldContextObject,
                                                 FName CombinatorId,
                                                 FName CombineableId,
                                                 FCombinationResult& CombinationResult) {
-	UDataTable* CombinationDataTable = GetItemCombinationDataTable(WorldContextObject);
+	const UDataTable* CombinationDataTable = GetItemCombinationDataTable(WorldContextObject);
 	if (CombinationDataTable) {
 		TArray<FItemCombinationTableRow*> CombinationRows;
 		CombinationDataTable->GetAllRows<FItemCombinationTableRow>("", CombinationRows);
-		for (FItemCombinationTableRow* Row : CombinationRows) {
+		for (const FItemCombinationTableRow* Row : CombinationRows) {
 			if (Row->CombinableId == CombinatorId) {
 				TMap<FName, FCombinationResult> CombinationResults = Row->CombinationResults;
-				FCombinationResult* Result = CombinationResults.Find(CombineableId);
+				const FCombinationResult* Result = CombinationResults.Find(CombineableId);
+				if (Result) {
+					CombinationResult = *Result;
+				}
+				return Result != nullptr;
+			}
+			if (Row->CombinableId == CombineableId) {
+				TMap<FName, FCombinationResult> CombinationResults = Row->CombinationResults;
+				const FCombinationResult* Result = CombinationResults.Find(CombinatorId);
 				if (Result) {
 					CombinationResult = *Result;
 				}
@@ -39,9 +49,6 @@ bool UETCombinationBlueprintLibrary::CanCombine(UObject* WorldContextObject,
 }
 
 UDataTable* UETCombinationBlueprintLibrary::GetItemCombinationDataTable(UObject* WorldContextObject) {
-	UETEquipmentInventorySubsystem* Subsystem = UETEquipmentInventorySubsystem::GetCurrent(WorldContextObject);
-	if (Subsystem) {
-		return Subsystem->GetItemDatabase();
-	}
-	return nullptr;
+	const UETEquipmentInventorySubsystem* Subsystem = UETEquipmentInventorySubsystem::GetCurrent(WorldContextObject);
+	return Subsystem ? Subsystem->GetItemCombinationDataTable() : nullptr;
 }

@@ -3,7 +3,6 @@
 
 #include "Inventory/ETInventoryComponent.h"
 
-#include "Combination/ETCombinationBlueprintLibrary.h"
 #include "Helpers/ETLogging.h"
 #include "Inventory/EterniaInventoryEntry.h"
 #include "Data/EterniaInventoryItemDefinition.h"
@@ -11,7 +10,12 @@
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
-UETInventoryComponent::UETInventoryComponent() {
+UETInventoryComponent::UETInventoryComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+	, Rows(1)
+	, Columns(1)
+	, Money(0)
+	, bIsDirty(false) {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -68,7 +72,7 @@ bool UETInventoryComponent::TryAddItem(UEterniaInventoryEntry* ItemToAdd) {
 
 bool UETInventoryComponent::TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile) {
 	if (!ItemToAdd) return false;
-	
+
 	bool bResult = false;
 	if (IsRoomAvailable(ItemToAdd, TopLeftTile)) {
 		UEterniaInventoryEntry* ItemAtTile;
@@ -99,33 +103,13 @@ bool UETInventoryComponent::TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, cons
 			bResult = true;
 		}
 	} else if (ItemToAdd->GetOwningInventoryComponent() != this) {
-		// Item has moved from other inventory
+		// Item has moved from another inventory
 		bResult = TryAddItem(ItemToAdd);
 		if (bResult) {
 			ItemToAdd->GetOwningInventoryComponent()->RemoveItem(ItemToAdd);
 		}
 	}
 	return bResult;
-}
-
-bool UETInventoryComponent::TryCombineItems(UEterniaInventoryEntry* InitiatorItem, UEterniaInventoryEntry* ItemToCombineWith) {
-	FCombinationResult CombinationResult;
-	if (UETCombinationBlueprintLibrary::CanCombineItems(this, InitiatorItem, ItemToCombineWith, CombinationResult)) {
-		InitiatorItem->SetAmount(InitiatorItem->GetAmount() - 1);
-		UEterniaInventoryItemDefinition* ResultItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.ResultId);
-		UEterniaInventoryEntry* ResultItem = UETInventoryStatics::CreateItemByDefinition(ResultItemDef, ItemToCombineWith->GetOwningInventoryComponent());
-		bool bTryAddItem = ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(ResultItem);
-
-		ItemToCombineWith->SetAmount(ItemToCombineWith->GetAmount() - 1);
-		if (CombinationResult.RemainderId != NAME_None) {
-			UEterniaInventoryItemDefinition* RemainderItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.RemainderId);
-			UEterniaInventoryEntry* RemainderItem = UETInventoryStatics::CreateItemByDefinition(RemainderItemDef, InitiatorItem->GetOwningInventoryComponent());
-			bTryAddItem = bTryAddItem && InitiatorItem->GetOwningInventoryComponent()->TryAddItem(RemainderItem);
-		}
-
-		return bTryAddItem;
-	}
-	return false;
 }
 
 bool UETInventoryComponent::RemoveItem(UEterniaInventoryEntry* EntryToRemove) {
@@ -257,7 +241,7 @@ UEterniaInventoryEntry* UETInventoryComponent::CreateItemByDefinition(const FInv
 	FEtItemDefinition* FoundItemDef = ItemDef.Definition.GetRow<FEtItemDefinition>("");
 	if (FoundItemDef) {
 		UEterniaInventoryItemDefinition* Definition = UEterniaInventoryItemDefinition::Convert(*FoundItemDef);
-		return UETInventoryStatics::CreateItemByDefinition(Definition, OwningInventoryComponent, ItemDef.Amount);	
+		return UETInventoryStatics::CreateItemByDefinition(Definition, OwningInventoryComponent, ItemDef.Amount);
 	}
 	return nullptr;
 }

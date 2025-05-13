@@ -11,7 +11,8 @@ class IAbilitySystemInterface;
 class UInputAction;
 class UEterniaInventoryEntry;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquippedItemChanged, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, OldItem);
+// FIXME bSilent usage is an ugly approach but it is needed for dependent code. Find a way to get rid of it
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, OldItem, bool, bSilent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UEquipmentSlot*, Slot);
 
 /**
@@ -23,7 +24,7 @@ class ETERNIAEQUIPMENTINVENTORY_API UEquipmentSlot : public UObject {
 
 public:
 
-	UEquipmentSlot();
+	UEquipmentSlot(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
 	bool TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
@@ -35,7 +36,7 @@ public:
 	bool IsEmpty() const { return InventoryEntry == nullptr; }
 
 	UFUNCTION(BlueprintCallable)
-	UEterniaInventoryEntry* Clear();
+	UEterniaInventoryEntry* Clear(bool bSilent = false);
 
 #pragma region GettersSetters
 
@@ -71,7 +72,7 @@ public:
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
-	UEterniaInventoryEntry* InventoryEntry = nullptr;
+	UEterniaInventoryEntry* InventoryEntry;
 
 	UPROPERTY(EditDefaultsOnly)
 	FName SlotName;
@@ -80,10 +81,10 @@ protected:
 	FDataTableRowHandle SlotTypeRowHandle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bIsActivatable = false;
+	bool bIsActivatable;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bIsBlocked = false;
+	bool bIsBlocked;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bIsActivatable"))
 	UInputAction* InputAction;

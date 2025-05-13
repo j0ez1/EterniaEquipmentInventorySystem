@@ -50,8 +50,5 @@ protected:
 	void UpdateSlotBlockState();
 
 	UFUNCTION()
-	void OnEquippedItemChanged_EquipmentSlot(UEquipmentSlot* Slot, UEterniaInventoryEntry* OldItem);
-
-	UFUNCTION()
-	void OnIsBlockedChanged_EquipmentSlot(UEquipmentSlot* Slot);
+	void OnEquippedItemChanged_EquipmentSlot(UEquipmentSlot* Slot, UEterniaInventoryEntry* OldItem, bool bSilent);
 };

@@ -19,4 +19,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Config, meta = (RequiredAssetDataTags = "RowStructure=/Script/EterniaEquipmentInventory.EtItemDefinition"))
 	TSoftObjectPtr<UDataTable> ItemDatabase;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Config, meta = (RequiredAssetDataTags = "RowStructure=/Script/EterniaEquipmentInventory.ItemCombinationTableRow"))
+	TSoftObjectPtr<UDataTable> ItemCombinationDataTable;
 };

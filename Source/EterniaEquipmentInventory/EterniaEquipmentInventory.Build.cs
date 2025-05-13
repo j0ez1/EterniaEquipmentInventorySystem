@@ -10,7 +10,7 @@ public class EterniaEquipmentInventory : ModuleRules
             new string[]
             {
                 "Core",
-                "EnhancedInput"
+                "EnhancedInput", "GameplayAbilities"
             }
         );
 

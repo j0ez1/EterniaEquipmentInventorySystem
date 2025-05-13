@@ -57,6 +57,12 @@ struct FEtItemDefinition : public FTableRowBase {
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "Consumable"))
 	FName ConsumeReplaceItemID;
 
+	/*
+	 * The effect activated when item is in inventory
+	 */
+	UPROPERTY(EditAnywhere)
+	TSoftClassPtr<UGameplayEffect> InInventoryEffect;
+
 };
 
 /**
@@ -101,6 +107,8 @@ public:
 
 	FORCEINLINE FName GetConsumeReplaceItemID() const { return ConsumeReplaceItemID; }
 
+	FORCEINLINE TSoftClassPtr<UGameplayEffect> GetInInventoryEffect() const { return InInventoryEffect; }
+
 	static UEterniaInventoryItemDefinition* Convert(const FEtItemDefinition& DTDef) {
 		UEterniaInventoryItemDefinition* Result = NewObject<UEterniaInventoryItemDefinition>();
 		Result->ItemID = DTDef.ItemID;
@@ -118,6 +126,7 @@ public:
 		Result->Consumable = DTDef.Consumable;
 		Result->ConsumeEffect = DTDef.ConsumeEffect;
 		Result->ConsumeReplaceItemID = DTDef.ConsumeReplaceItemID;
+		Result->InInventoryEffect = DTDef.InInventoryEffect;
 		return Result;
 	}
 
@@ -167,4 +176,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName ConsumeReplaceItemID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftClassPtr<UGameplayEffect> InInventoryEffect;
 };

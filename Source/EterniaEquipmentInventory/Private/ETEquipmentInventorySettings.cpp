@@ -3,6 +3,7 @@
 
 #include "ETEquipmentInventorySettings.h"
 
-UETEquipmentInventorySettings::UETEquipmentInventorySettings(const FObjectInitializer& ObjInit) {
+UETEquipmentInventorySettings::UETEquipmentInventorySettings(const FObjectInitializer& ObjInit)
+	: Super(ObjInit) {
 	CategoryName = TEXT("Eternia Framework");
 }

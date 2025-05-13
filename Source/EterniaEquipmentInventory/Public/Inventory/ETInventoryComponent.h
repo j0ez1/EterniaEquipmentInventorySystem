@@ -7,10 +7,30 @@
 #include "ETInventoryComponent.generated.h"
 
 
+class UETInventoryComponent;
 class UEterniaItemDatabase;
 class UEterniaInventoryEntry;
 class UEterniaInventoryWeaponDefinition;
 class UEterniaInventoryItemDefinition;
+
+// This class does not need to be modified.
+UINTERFACE()
+class ETERNIAEQUIPMENTINVENTORY_API UInventoryInterface : public UInterface {
+	GENERATED_BODY()
+};
+
+/**
+ * 
+ */
+class ETERNIAEQUIPMENTINVENTORY_API IInventoryInterface {
+	GENERATED_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+public:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Inventory")
+	UETInventoryComponent* GetInventoryComponent() const;
+};
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
 
@@ -59,7 +79,7 @@ class ETERNIAEQUIPMENTINVENTORY_API UETInventoryComponent : public UActorCompone
 
 public:
 
-	UETInventoryComponent();
+	UETInventoryComponent(const FObjectInitializer& ObjectInitializer);
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -69,9 +89,6 @@ public:
 	bool TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile);
 
 	UFUNCTION(BlueprintCallable)
-	bool TryCombineItems(UEterniaInventoryEntry* InitiatorItem, UEterniaInventoryEntry* ItemToCombineWith);
-
-	UFUNCTION(BlueprintCallable)
 	bool RemoveItem(UEterniaInventoryEntry* EntryToRemove);
 
 	UFUNCTION(BlueprintCallable)
@@ -79,8 +96,6 @@ public:
 
 	// Entry to remove must exist in inventory
 	void SwapItems(UEterniaInventoryEntry* EntryToRemove, UEterniaInventoryEntry* EntryToAdd);
-
-	void InitInventory();
 
 	bool GetItemTopLeftTile(UEterniaInventoryEntry* Item, FInventoryTile& Tile);
 
@@ -124,15 +139,15 @@ protected:
 	TArray<FInventoryItem> StartItems;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
-	int32 Rows = 1;
+	int32 Rows;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
-	int32 Columns = 1;
+	int32 Columns;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 Money = 0;
+	int32 Money;
 
-	bool bIsDirty = false;
+	bool bIsDirty;
 
 	virtual void BeginPlay() override;
 
@@ -149,4 +164,6 @@ protected:
 	void OnItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
 
 	void AddItemAt(UEterniaInventoryEntry* Item, const FInventoryTile& TopLeftTile);
+
+	void InitInventory();
 };

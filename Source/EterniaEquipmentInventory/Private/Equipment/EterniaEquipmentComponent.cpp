@@ -77,7 +77,6 @@ void UEterniaEquipmentComponent::BeginPlay() {
 
 	for (auto Slot : Slots) {
 		Slot->OnEquippedItemChanged.AddDynamic(this, &UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot);
-		Slot->OnIsBlockedChanged.AddDynamic(this, &UEterniaEquipmentComponent::OnIsBlockedChanged_EquipmentSlot);
 	}
 }
 
@@ -126,12 +125,6 @@ void UEterniaEquipmentComponent::UpdateSlotBlockState() {
 	}
 }
 
-void UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UEquipmentSlot* Slot, UEterniaInventoryEntry* OldItem) {
+void UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UEquipmentSlot* Slot, UEterniaInventoryEntry* OldItem, bool bSilent) {
 	UpdateSlotBlockState();
-}
-
-void UEterniaEquipmentComponent::OnIsBlockedChanged_EquipmentSlot(UEquipmentSlot* Slot) {
-	if (Slot && Slot->IsBlocked()) {
-		Slot->Clear();
-	}
 }

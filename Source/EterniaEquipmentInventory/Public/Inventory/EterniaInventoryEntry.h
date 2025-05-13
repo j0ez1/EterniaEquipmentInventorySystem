@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "Data/EterniaInventoryItemDefinition.h"
 #include "UObject/Object.h"
 #include "EterniaInventoryEntry.generated.h"
@@ -23,6 +24,8 @@ class ETERNIAEQUIPMENTINVENTORY_API UEterniaInventoryEntry : public UObject {
 	GENERATED_BODY()
 
 public:
+
+	UEterniaInventoryEntry(const FObjectInitializer& ObjectInitializer);
 
 	FORCEINLINE UEterniaInventoryItemDefinition* GetDefinition() const { return Definition; }
 
@@ -51,14 +54,14 @@ public:
 	FOnItemRotated_InventoryEntry OnItemRotated;
 
 	UFUNCTION(BlueprintCallable)
-	bool IsRotated() const { return Rotated; }
+	FORCEINLINE bool IsRotated() const { return Rotated; }
 
 	FORCEINLINE UETInventoryComponent* GetOwningInventoryComponent() const { return OwningInventoryComponent; }
 
-	void SetOwningInventoryComponent(UETInventoryComponent* InInventoryComponent) { OwningInventoryComponent = InInventoryComponent; }
+	void SetOwningInventoryComponent(UETInventoryComponent* InInventoryComponent);
 
 	UFUNCTION(BlueprintPure)
-	FORCEINLINE bool IsStackable() const { return Definition ? Definition->IsStackable() : false; }
+	FORCEINLINE bool IsStackable() const { return Definition && Definition->IsStackable(); }
 
 	UFUNCTION(BlueprintPure)
 	bool IsSameItem(UEterniaInventoryEntry* Item) const;
@@ -72,6 +75,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Activate(AActor* ActivatorActor);
 
+	UFUNCTION(BlueprintCallable)
+	bool TryCombineWith(UEterniaInventoryEntry* ItemToCombineWith);
+
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
@@ -81,8 +87,12 @@ protected:
 	int32 Amount;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool Rotated = false;
+	bool Rotated;
 
 	UPROPERTY(BlueprintReadOnly)
 	UETInventoryComponent* OwningInventoryComponent;
+
+	FActiveGameplayEffectHandle InInventoryEffectHandle;
+
+	static UAbilitySystemComponent* FindAbilitySystemComponent(UETInventoryComponent* InventoryComponent);
 };

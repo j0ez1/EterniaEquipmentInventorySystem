@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/EterniaInventoryItemDefinition.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ETEquipmentInventorySubsystem.generated.h"
 
@@ -17,11 +18,19 @@ public:
 
 	static UETEquipmentInventorySubsystem* GetCurrent(UObject* WorldContextObject);
 
-	FORCEINLINE UDataTable* GetItemDatabase() const { return ItemDatabase; }
+	FORCEINLINE UDataTable* GetItemDatabase() const { return ItemDatabase.LoadSynchronous(); }
+
+	FORCEINLINE UDataTable* GetItemCombinationDataTable() const { return ItemCombinationDataTable.LoadSynchronous(); }
+
+	UEterniaInventoryItemDefinition* FindItemDefinitionById(FName ItemID);
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 protected:
+
 	UPROPERTY()
-	UDataTable* ItemDatabase;
+	TSoftObjectPtr<UDataTable> ItemDatabase;
+
+	UPROPERTY()
+	TSoftObjectPtr<UDataTable> ItemCombinationDataTable;
 };

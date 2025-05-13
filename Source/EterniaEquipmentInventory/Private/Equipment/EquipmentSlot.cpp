@@ -5,7 +5,9 @@
 
 #include "Inventory/EterniaInventoryEntry.h"
 
-UEquipmentSlot::UEquipmentSlot() {
+UEquipmentSlot::UEquipmentSlot(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer),
+bIsActivatable(false), bIsBlocked(false){
 }
 
 bool UEquipmentSlot::TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
@@ -45,13 +47,13 @@ bool UEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
 	return false;
 }
 
-UEterniaInventoryEntry* UEquipmentSlot::Clear() {
+UEterniaInventoryEntry* UEquipmentSlot::Clear(bool bSilent) {
 	UEterniaInventoryEntry* OldItem = InventoryEntry;
 	if (InventoryEntry) {
 		InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
 	}
 	InventoryEntry = nullptr;
-	OnEquippedItemChanged.Broadcast(this, OldItem);
+	OnEquippedItemChanged.Broadcast(this, OldItem, bSilent);
 	return OldItem;
 }
 
@@ -67,6 +69,9 @@ void UEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
 	if (bIsBlocked == InbIsBlocked) return;
 
 	bIsBlocked = InbIsBlocked;
+	if (bIsBlocked) {
+		Clear();
+	}
 	OnIsBlockedChanged.Broadcast(this);
 }
 
@@ -79,7 +84,7 @@ bool UEquipmentSlot::DoSetItem(UEterniaInventoryEntry* NewItem) {
 			}
 			InventoryEntry = NewItem;
 			InventoryEntry->OnItemAmountChanged.AddUniqueDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
-			OnEquippedItemChanged.Broadcast(this, OldItem);
+			OnEquippedItemChanged.Broadcast(this, OldItem, false);
 			return true;
 		}
 	}
@@ -91,7 +96,7 @@ void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem
 		if (NewAmount <= 0) {
 			Clear();
 		} else {
-			OnEquippedItemChanged.Broadcast(this, nullptr);
+			OnEquippedItemChanged.Broadcast(this, nullptr, false);
 		}
 	}
 }
