@@ -5,18 +5,18 @@
 
 #include "ETEquipmentInventorySubsystem.h"
 #include "Helpers/ETLogging.h"
-#include "Inventory/EterniaInventoryEntry.h"
-#include "Data/EterniaInventoryItemDefinition.h"
+#include "Inventory/ETInventoryEntry.h"
+#include "Data/ETInventoryItemDefinition.h"
 #include "Inventory/ETInventoryComponent.h"
 
-UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass) {
+UETInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass) {
 	UDataTable* ItemDataTable = GetItemDataTable(WorldContextObject);
 	if (ItemDataTable) {
 		TArray<FEtItemDefinition*> OutRowArray;
 		ItemDataTable->GetAllRows<FEtItemDefinition>("", OutRowArray);
 		for (FEtItemDefinition* Definition : OutRowArray) {
 			if (Definition && Definition->Representation == ItemClass) {
-				return UEterniaInventoryItemDefinition::Convert(*Definition);
+				return UETInventoryItemDefinition::Convert(*Definition);
 			}
 		}
 	} else {
@@ -25,7 +25,7 @@ UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepres
 	return nullptr;
 }
 
-UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByID(UObject* WorldContextObject, FName ItemID) {
+UETInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByID(UObject* WorldContextObject, FName ItemID) {
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (World) {
 		UGameInstance* GameInstance = World->GetGameInstance();
@@ -38,11 +38,11 @@ UEterniaInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByID(UOb
 	return nullptr;
 }
 
-UEterniaInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UEterniaInventoryItemDefinition* Definition,
-                                                                    UETInventoryComponent* OwningInventoryComponent,
+UETInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UETInventoryItemDefinition* Definition,
+                                                                    UETInventoryComponentBase* OwningInventoryComponent,
                                                                     int32 Amount) {
 	if (Definition) {
-		UEterniaInventoryEntry* NewItem = NewObject<UEterniaInventoryEntry>(OwningInventoryComponent);
+		UETInventoryEntry* NewItem = NewObject<UETInventoryEntry>(OwningInventoryComponent);
 		NewItem->SetAmount(Amount);
 		NewItem->SetDefinition(Definition);
 		NewItem->SetOwningInventoryComponent(OwningInventoryComponent);

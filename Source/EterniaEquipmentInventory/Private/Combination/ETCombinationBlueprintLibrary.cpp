@@ -4,11 +4,11 @@
 #include "Combination/ETCombinationBlueprintLibrary.h"
 
 #include "ETEquipmentInventorySubsystem.h"
-#include "Inventory/EterniaInventoryEntry.h"
+#include "Inventory/ETInventoryEntry.h"
 
 bool UETCombinationBlueprintLibrary::CanCombineItems(UObject* WorldContextObject,
-                                                     UEterniaInventoryEntry* InitiatorItem,
-                                                     UEterniaInventoryEntry* ItemToCombineWith,
+                                                     UETInventoryEntry* InitiatorItem,
+                                                     UETInventoryEntry* ItemToCombineWith,
                                                      FCombinationResult& CombinationResult) {
 	if (InitiatorItem != nullptr && ItemToCombineWith != nullptr) {
 		const FName CombinatorId = InitiatorItem->GetDefinition()->GetItemID();

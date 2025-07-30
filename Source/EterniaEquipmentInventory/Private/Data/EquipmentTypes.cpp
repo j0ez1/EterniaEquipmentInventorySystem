@@ -3,18 +3,18 @@
 
 #include "Data/EquipmentTypes.h"
 
-TArray<FETEquipmentSlot> FETItemType::GetValidEquipmentSlotTypes() const {
+TArray<FETEquipmentSlotType> FETItemType::GetValidEquipmentSlotTypes() const {
 	return UnpackDataTableRowArray(ValidEquipmentSlotTypes);
 }
 
-TArray<FETEquipmentSlot> FETItemType::GetBlocksEquipmentSlotTypes() const {
+TArray<FETEquipmentSlotType> FETItemType::GetBlocksEquipmentSlotTypes() const {
 	return UnpackDataTableRowArray(BlocksEquipmentSlotTypes);
 }
 
-TArray<FETEquipmentSlot> FETItemType::UnpackDataTableRowArray(const TArray<FDataTableRowHandle>& Array) {
-	TArray<FETEquipmentSlot> ResultArray;
+TArray<FETEquipmentSlotType> FETItemType::UnpackDataTableRowArray(const TArray<FDataTableRowHandle>& Array) {
+	TArray<FETEquipmentSlotType> ResultArray;
 	for (FDataTableRowHandle RowHandle : Array) {
-		FETEquipmentSlot* SlotType = RowHandle.GetRow<FETEquipmentSlot>("");
+		FETEquipmentSlotType* SlotType = RowHandle.GetRow<FETEquipmentSlotType>("");
 		if (SlotType) {
 			ResultArray.AddUnique(*SlotType);
 		}

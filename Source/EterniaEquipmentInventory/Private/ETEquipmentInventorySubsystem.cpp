@@ -30,7 +30,7 @@ void UETEquipmentInventorySubsystem::Initialize(FSubsystemCollectionBase& Collec
 	}
 }
 
-UEterniaInventoryItemDefinition* UETEquipmentInventorySubsystem::FindItemDefinitionById(FName ItemID) {
+UETInventoryItemDefinition* UETEquipmentInventorySubsystem::FindItemDefinitionById(FName ItemID) {
 	if (!ItemDatabase || !ItemDatabase.LoadSynchronous()) {
 		EEIS_ULOGS_ERROR(TEXT("Item DataTable is null"))
 		return nullptr;
@@ -40,7 +40,7 @@ UEterniaInventoryItemDefinition* UETEquipmentInventorySubsystem::FindItemDefinit
 	ItemDatabase->GetAllRows<FEtItemDefinition>("", OutRowArray);
 	for (const FEtItemDefinition* Definition : OutRowArray) {
 		if (Definition && Definition->ItemID == ItemID) {
-			return UEterniaInventoryItemDefinition::Convert(*Definition);
+			return UETInventoryItemDefinition::Convert(*Definition);
 		}
 	}
 	return nullptr;

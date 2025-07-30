@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "ETCombinationBlueprintLibrary.generated.h"
 
-class UEterniaInventoryEntry;
+class UETInventoryEntry;
 
 USTRUCT(BlueprintType)
 struct FCombinationResult {
@@ -35,7 +35,7 @@ class ETERNIAEQUIPMENTINVENTORY_API UETCombinationBlueprintLibrary : public UBlu
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool CanCombineItems(UObject* WorldContextObject, UEterniaInventoryEntry* InitiatorItem, UEterniaInventoryEntry* ItemToCombineWith, FCombinationResult& CombinationResult);
+	static bool CanCombineItems(UObject* WorldContextObject, UETInventoryEntry* InitiatorItem, UETInventoryEntry* ItemToCombineWith, FCombinationResult& CombinationResult);
 
 	UFUNCTION(BlueprintCallable)
 	static bool CanCombine(UObject* WorldContextObject, FName CombinatorId, FName CombineableId, FCombinationResult& CombinationResult);

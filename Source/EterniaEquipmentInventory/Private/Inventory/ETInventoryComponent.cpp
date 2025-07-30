@@ -4,9 +4,8 @@
 #include "Inventory/ETInventoryComponent.h"
 
 #include "Helpers/ETLogging.h"
-#include "Inventory/EterniaInventoryEntry.h"
-#include "Data/EterniaInventoryItemDefinition.h"
-#include "Inventory/ETInventoryStatics.h"
+#include "Inventory/ETInventoryEntry.h"
+#include "Data/ETInventoryItemDefinition.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -14,8 +13,7 @@ UETInventoryComponent::UETInventoryComponent(const FObjectInitializer& ObjectIni
 	: Super(ObjectInitializer)
 	, Rows(1)
 	, Columns(1)
-	, Money(0)
-	, bIsDirty(false) {
+	, Money(0) {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -25,13 +23,13 @@ void UETInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Inventory.Empty();
 }
 
-bool UETInventoryComponent::TryAddItem(UEterniaInventoryEntry* ItemToAdd) {
+bool UETInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
 	if (!ItemToAdd) {
 		EEIS_ULOG_ERROR(TEXT("Inventory entry to add is null"))
 		return false;
 	}
 
-	UEterniaInventoryItemDefinition* Definition = ItemToAdd->GetDefinition();
+	UETInventoryItemDefinition* Definition = ItemToAdd->GetDefinition();
 	if (!Definition) {
 		EEIS_ULOG_ERROR(TEXT("Inventory entry definition is null"))
 		return false;
@@ -43,7 +41,7 @@ bool UETInventoryComponent::TryAddItem(UEterniaInventoryEntry* ItemToAdd) {
 
 	// Find existing stackable item
 	if (ItemToAdd->IsStackable()) {
-		for (const TObjectPtr<UEterniaInventoryEntry>& ExistingItem : Items) {
+		for (const TObjectPtr<UETInventoryEntry>& ExistingItem : Items) {
 			if (ExistingItem && ExistingItem->IsSameItem(ItemToAdd)) {
 				if (ExistingItem->GetAmount() < Definition->GetStackSize()) {
 					ExistingItem->IncrementAmount(ItemToAdd->GetAmount());
@@ -70,12 +68,12 @@ bool UETInventoryComponent::TryAddItem(UEterniaInventoryEntry* ItemToAdd) {
 	return false;
 }
 
-bool UETInventoryComponent::TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile) {
+bool UETInventoryComponent::TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile) {
 	if (!ItemToAdd) return false;
 
 	bool bResult = false;
 	if (IsRoomAvailable(ItemToAdd, TopLeftTile)) {
-		UEterniaInventoryEntry* ItemAtTile;
+		UETInventoryEntry* ItemAtTile;
 		if (GetItemAtTile(TopLeftTile, ItemAtTile) && ItemAtTile) {
 			if (ItemAtTile != ItemToAdd) {
 				// Merging with the same item
@@ -88,7 +86,7 @@ bool UETInventoryComponent::TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, cons
 					// Partial merge
 					ItemAtTile->SetAmount(ItemAtTile->GetAmount() + CurrentStackLimit);
 					ItemToAdd->SetAmount(ItemToAdd->GetAmount() - CurrentStackLimit);
-					UETInventoryComponent* OwningInventoryComponent = ItemToAdd->GetOwningInventoryComponent();
+					UETInventoryComponentBase* OwningInventoryComponent = ItemToAdd->GetOwningInventoryComponent();
 					if (OwningInventoryComponent != this) {
 						if (TryAddItem(ItemToAdd)) {
 							OwningInventoryComponent->RemoveItem(ItemToAdd);
@@ -112,11 +110,11 @@ bool UETInventoryComponent::TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, cons
 	return bResult;
 }
 
-bool UETInventoryComponent::RemoveItem(UEterniaInventoryEntry* EntryToRemove) {
+bool UETInventoryComponent::RemoveItem(UETInventoryEntry* EntryToRemove) {
 	bool bItemRemoved = false;
 	if (EntryToRemove) {
 		for (int i = 0; i < Inventory.Num(); ++i) {
-			TObjectPtr<UEterniaInventoryEntry> ExistingEntry = Inventory[i];
+			TObjectPtr<UETInventoryEntry> ExistingEntry = Inventory[i];
 			if (ExistingEntry == EntryToRemove) {
 				ExistingEntry->OnItemAmountChanged.RemoveDynamic(this, &UETInventoryComponent::OnItemAmountChanged);
 				Inventory[i] = nullptr;
@@ -131,37 +129,18 @@ bool UETInventoryComponent::RemoveItem(UEterniaInventoryEntry* EntryToRemove) {
 	return bItemRemoved;
 }
 
-TMap<UEterniaInventoryEntry*, FInventoryTile> UETInventoryComponent::GetAllItems() {
-	TMap<UEterniaInventoryEntry*, FInventoryTile> AllItems;
+TMap<UETInventoryEntry*, FInventoryTile> UETInventoryComponent::GetAllItems() const {
+	TMap<UETInventoryEntry*, FInventoryTile> AllItems;
 	for (int i = 0; i < Inventory.Num(); ++i) {
-		UEterniaInventoryEntry* Item = Inventory[i];
-		if (Item) {
-			if (!AllItems.Contains(Item)) {
-				AllItems.Add(Item, IndexToTile(i));
-			}
+		UETInventoryEntry* Item = Inventory[i];
+		if (Item && !AllItems.Contains(Item)) {
+			AllItems.Add(Item, IndexToTile(i));
 		}
 	}
 	return AllItems;
 }
 
-void UETInventoryComponent::SwapItems(UEterniaInventoryEntry* EntryToRemove, UEterniaInventoryEntry* EntryToAdd) {
-	if (EntryToRemove && EntryToRemove->GetOwningInventoryComponent() && TryAddItem(EntryToAdd)) {
-		EntryToRemove->GetOwningInventoryComponent()->RemoveItem(EntryToRemove);
-	}
-}
-
-void UETInventoryComponent::InitInventory() {
-	Inventory.Init(nullptr, Rows * Columns);
-	for (FInventoryItem Item : StartItems) {
-		UEterniaInventoryEntry* NewItem = CreateItemByDefinition(Item, this);
-		TryAddItem(NewItem);
-	}
-
-	// Workaround for Inventory UI correct drawing
-	OnInventoryInitialized.Broadcast();
-}
-
-bool UETInventoryComponent::GetItemTopLeftTile(UEterniaInventoryEntry* Item, FInventoryTile& Tile) {
+bool UETInventoryComponent::GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const {
 	for (int i = 0; i < Rows; ++i) {
 		for (int j = 0; j < Columns; ++j) {
 			if (Inventory[i * Columns + j] == Item) {
@@ -174,16 +153,16 @@ bool UETInventoryComponent::GetItemTopLeftTile(UEterniaInventoryEntry* Item, FIn
 }
 
 void UETInventoryComponent::BeginPlay() {
+	Inventory.Init(nullptr, Rows * Columns);
+	
 	Super::BeginPlay();
-
-	InitInventory();
 }
 
-bool UETInventoryComponent::IsRoomAvailable(UEterniaInventoryEntry* ItemToCheck, int32 TopLeftIndex) const {
+bool UETInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const {
 	return IsRoomAvailable(ItemToCheck, IndexToTile(TopLeftIndex));
 }
 
-bool UETInventoryComponent::IsRoomAvailable(UEterniaInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const {
+bool UETInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const {
 	if (!ItemToCheck) {
 		return false;
 	}
@@ -194,7 +173,7 @@ bool UETInventoryComponent::IsRoomAvailable(UEterniaInventoryEntry* ItemToCheck,
 		for (int32 Y = TopLeftTile.Y; Y < TopLeftTile.Y + TilesY; Y++) {
 			FInventoryTile CurrentTile(X, Y);
 			if (IsTileValid(CurrentTile)) {
-				UEterniaInventoryEntry* ItemAtTile;
+				UETInventoryEntry* ItemAtTile;
 				if (GetItemAtIndex(TileToIndex(CurrentTile), ItemAtTile)) {
 					if (ItemAtTile) {
 						bool bIsSameStackableItemWithAvailSpace = ItemAtTile->IsSameItem(ItemToCheck) && !ItemAtTile->IsStackFull();
@@ -225,7 +204,7 @@ bool UETInventoryComponent::IsTileValid(const FInventoryTile& Tile) const {
 	return Tile.X >= 0 && Tile.Y >= 0 && Tile.X < Columns && Tile.Y < Rows;
 }
 
-bool UETInventoryComponent::GetItemAtIndex(int32 Index, UEterniaInventoryEntry*& Item) const {
+bool UETInventoryComponent::GetItemAtIndex(int32 Index, UETInventoryEntry*& Item) const {
 	if (Inventory.IsValidIndex(Index)) {
 		Item = Inventory[Index].Get();
 		return true;
@@ -233,30 +212,21 @@ bool UETInventoryComponent::GetItemAtIndex(int32 Index, UEterniaInventoryEntry*&
 	return false;
 }
 
-bool UETInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UEterniaInventoryEntry*& Item) const {
+bool UETInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const {
 	return GetItemAtIndex(TileToIndex(Tile), Item);
 }
 
-UEterniaInventoryEntry* UETInventoryComponent::CreateItemByDefinition(const FInventoryItem& ItemDef, UETInventoryComponent* OwningInventoryComponent) {
-	FEtItemDefinition* FoundItemDef = ItemDef.Definition.GetRow<FEtItemDefinition>("");
-	if (FoundItemDef) {
-		UEterniaInventoryItemDefinition* Definition = UEterniaInventoryItemDefinition::Convert(*FoundItemDef);
-		return UETInventoryStatics::CreateItemByDefinition(Definition, OwningInventoryComponent, ItemDef.Amount);
-	}
-	return nullptr;
-}
-
-void UETInventoryComponent::AddItemAt(UEterniaInventoryEntry* Item, int32 TopLeftIndex) {
+void UETInventoryComponent::AddItemAt(UETInventoryEntry* Item, int32 TopLeftIndex) {
 	AddItemAt(Item, IndexToTile(TopLeftIndex));
 }
 
-void UETInventoryComponent::OnItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount) {
+void UETInventoryComponent::OnItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount) {
 	if (NewAmount <= 0) {
 		RemoveItem(UpdatedItem);
 	}
 }
 
-void UETInventoryComponent::AddItemAt(UEterniaInventoryEntry* Item, const FInventoryTile& TopLeftTile) {
+void UETInventoryComponent::AddItemAt(UETInventoryEntry* Item, const FInventoryTile& TopLeftTile) {
 	if (Item) {
 		Items.Add(Item);
 		Item->SetOwningInventoryComponent(this);
@@ -271,7 +241,6 @@ void UETInventoryComponent::AddItemAt(UEterniaInventoryEntry* Item, const FInven
 				}
 			}
 		}
-		bIsDirty = true;
 		OnItemAdded.Broadcast(Item);
 		Item->OnItemAmountChanged.AddUniqueDynamic(this, &UETInventoryComponent::OnItemAmountChanged);
 	}

@@ -3,36 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "ETInventoryComponentBase.h"
 #include "ETInventoryComponent.generated.h"
 
 
 class UETInventoryComponent;
 class UEterniaItemDatabase;
-class UEterniaInventoryEntry;
-class UEterniaInventoryWeaponDefinition;
-class UEterniaInventoryItemDefinition;
-
-// This class does not need to be modified.
-UINTERFACE()
-class ETERNIAEQUIPMENTINVENTORY_API UInventoryInterface : public UInterface {
-	GENERATED_BODY()
-};
-
-/**
- * 
- */
-class ETERNIAEQUIPMENTINVENTORY_API IInventoryInterface {
-	GENERATED_BODY()
-
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
-public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Inventory")
-	UETInventoryComponent* GetInventoryComponent() const;
-};
-
-
-DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
+class UETInventoryEntry;
+class UETInventoryItemDefinition;
 
 USTRUCT(BlueprintType)
 struct FInventoryTile {
@@ -40,7 +18,9 @@ struct FInventoryTile {
 
 	FInventoryTile() = default;
 
-	FInventoryTile(int32 TileX, int32 TileY): X(TileX), Y(TileY) {};
+	FInventoryTile(int32 TileX, int32 TileY)
+		: X(TileX)
+		, Y(TileY) {};
 
 	UPROPERTY(BlueprintReadWrite)
 	int32 X;
@@ -49,65 +29,39 @@ struct FInventoryTile {
 	int32 Y;
 
 	FIntPoint ToIntPoint() const {
-		return FIntPoint(X, Y); 
+		return FIntPoint(X, Y);
 	}
 };
 
-USTRUCT()
-struct FInventoryItem {
-	GENERATED_BODY()
-
-	FInventoryItem() = default;
-
-	UPROPERTY(EditAnywhere)
-	FDataTableRowHandle Definition = FDataTableRowHandle();
-
-	UPROPERTY(EditAnywhere, meta=(UIMin=1, ClampMin=1))
-	int32 Amount = 1;
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UEterniaInventoryEntry*, Item);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUpdatedDelegate, UEterniaInventoryEntry*, Item);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, UEterniaInventoryEntry*, Item);
-
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMoneyCountChangedSignature, float);
-DECLARE_MULTICAST_DELEGATE(FOnInventoryInitialized);
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class ETERNIAEQUIPMENTINVENTORY_API UETInventoryComponent : public UActorComponent {
+UCLASS(ClassGroup=(Eternia), meta=(BlueprintSpawnableComponent))
+class ETERNIAEQUIPMENTINVENTORY_API UETInventoryComponent : public UETInventoryComponentBase {
 	GENERATED_BODY()
 
 public:
 
 	UETInventoryComponent(const FObjectInitializer& ObjectInitializer);
 
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	bool TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile);
 
 	UFUNCTION(BlueprintCallable)
-	bool TryAddItem(UEterniaInventoryEntry* ItemToAdd);
+	TMap<UETInventoryEntry*, FInventoryTile> GetAllItems() const;
 
-	bool TryAddItemAt(UEterniaInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile);
-
-	UFUNCTION(BlueprintCallable)
-	bool RemoveItem(UEterniaInventoryEntry* EntryToRemove);
-
-	UFUNCTION(BlueprintCallable)
-	TMap<UEterniaInventoryEntry*, FInventoryTile> GetAllItems();
-
-	// Entry to remove must exist in inventory
-	void SwapItems(UEterniaInventoryEntry* EntryToRemove, UEterniaInventoryEntry* EntryToAdd);
-
-	bool GetItemTopLeftTile(UEterniaInventoryEntry* Item, FInventoryTile& Tile);
-
-	FOnItemAddedDelegate OnItemAdded;
-
-	FOnItemUpdatedDelegate OnItemUpdated;
-
-	FOnItemRemovedDelegate OnItemRemoved;
+	bool GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const;
 
 	FOnMoneyCountChangedSignature OnMoneyChanged;
 
-	FOnInventoryInitialized OnInventoryInitialized;
+	UFUNCTION(BlueprintCallable)
+	bool IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const;
+
+	bool IsRoomAvailable(UETInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const;
+
+	bool GetItemAtIndex(int32 Index, UETInventoryEntry*& Item) const;
+
+	bool GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const;
+
+#pragma region Getters
 
 	FORCEINLINE int32 GetMoney() const { return Money; }
 
@@ -115,28 +69,26 @@ public:
 
 	FORCEINLINE int32 GetColumns() const { return Columns; }
 
-	UFUNCTION(BlueprintCallable)
-	bool IsRoomAvailable(UEterniaInventoryEntry* ItemToCheck, int32 TopLeftIndex) const;
+#pragma endregion
 
-	bool IsRoomAvailable(UEterniaInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const;
+#pragma region UETInventoryComponentBase
 
-	static UEterniaInventoryEntry* CreateItemByDefinition(const FInventoryItem& ItemDef, UETInventoryComponent* OwningInventoryComponent);
+	virtual bool TryAddItem(UETInventoryEntry* ItemToAdd) override;
 
-	bool GetItemAtIndex(int32 Index, UEterniaInventoryEntry*& Item) const;
+	virtual bool RemoveItem(UETInventoryEntry* EntryToRemove) override;
 
-	bool GetItemAtTile(const FInventoryTile& Tile, UEterniaInventoryEntry*& Item) const;
+#pragma endregion
+
+#pragma region UActorComponent
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#pragma endregion
 
 protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TArray<TObjectPtr<UEterniaInventoryEntry>> Inventory;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TArray<TObjectPtr<UEterniaInventoryEntry>> Items;
-
-	// Items to be added to inventory on BeginPlay
-	UPROPERTY(EditAnywhere)
-	TArray<FInventoryItem> StartItems;
+	TArray<TObjectPtr<UETInventoryEntry>> Inventory;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Rows;
@@ -147,10 +99,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 Money;
 
-	bool bIsDirty;
-
-	virtual void BeginPlay() override;
-
 	FInventoryTile IndexToTile(int32 Index) const;
 
 	UFUNCTION(BlueprintCallable)
@@ -158,12 +106,16 @@ protected:
 
 	bool IsTileValid(const FInventoryTile& Tile) const;
 
-	void AddItemAt(UEterniaInventoryEntry* Item, int32 TopLeftIndex);
+	void AddItemAt(UETInventoryEntry* Item, int32 TopLeftIndex);
 
 	UFUNCTION()
-	void OnItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
+	void OnItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount);
 
-	void AddItemAt(UEterniaInventoryEntry* Item, const FInventoryTile& TopLeftTile);
+	void AddItemAt(UETInventoryEntry* Item, const FInventoryTile& TopLeftTile);
 
-	void InitInventory();
+#pragma region UActorComponent
+
+	virtual void BeginPlay() override;
+
+#pragma endregion
 };

@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ETInventoryComponentBase.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ETInventoryStatics.generated.h"
 
 class UETInventoryComponent;
-class UEterniaInventoryEntry;
-class UEterniaInventoryItemDefinition;
+class UETInventoryEntry;
+class UETInventoryItemDefinition;
 /**
  * 
  */
@@ -19,13 +20,13 @@ class ETERNIAEQUIPMENTINVENTORY_API UETInventoryStatics : public UBlueprintFunct
 public:
 
 	UFUNCTION(BlueprintCallable, Category="Eternia|Items")
-	static UEterniaInventoryItemDefinition* FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass);
+	static UETInventoryItemDefinition* FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass);
 
 	UFUNCTION(BlueprintCallable, Category="Eternia|Items")
-	static UEterniaInventoryItemDefinition* FindItemDefinitionByID(UObject* WorldContextObject, FName ItemID);
+	static UETInventoryItemDefinition* FindItemDefinitionByID(UObject* WorldContextObject, FName ItemID);
 
 	UFUNCTION(BlueprintCallable, Category="Eternia|Items")
-	static UEterniaInventoryEntry* CreateItemByDefinition(UEterniaInventoryItemDefinition* Definition, UETInventoryComponent* OwningInventoryComponent, int32 Amount = 1);
+	static UETInventoryEntry* CreateItemByDefinition(UETInventoryItemDefinition* Definition, UETInventoryComponentBase* OwningInventoryComponent, int32 Amount = 1);
 
 private:
 

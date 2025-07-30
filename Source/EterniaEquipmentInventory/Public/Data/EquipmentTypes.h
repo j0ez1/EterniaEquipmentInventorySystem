@@ -5,7 +5,7 @@
 #include "EquipmentTypes.generated.h"
 
 USTRUCT(BlueprintType)
-struct FETEquipmentSlot : public FTableRowBase {
+struct FETEquipmentSlotType : public FTableRowBase {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -14,7 +14,7 @@ struct FETEquipmentSlot : public FTableRowBase {
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText DisplayName;
 
-	bool operator==(const FETEquipmentSlot& Other) const { return Identifier == Other.Identifier; }
+	bool operator==(const FETEquipmentSlotType& Other) const { return Identifier == Other.Identifier; }
 };
 
 USTRUCT(BlueprintType)
@@ -30,9 +30,9 @@ struct FETItemType : public FTableRowBase {
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName CategoryID = NAME_None;
 
-	TArray<FETEquipmentSlot> GetValidEquipmentSlotTypes() const;
+	TArray<FETEquipmentSlotType> GetValidEquipmentSlotTypes() const;
 
-	TArray<FETEquipmentSlot> GetBlocksEquipmentSlotTypes() const;
+	TArray<FETEquipmentSlotType> GetBlocksEquipmentSlotTypes() const;
 
 	bool operator==(const FETItemType& Other) const { return Identifier == Other.Identifier; }
 
@@ -44,5 +44,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (RequiredAssetDataTags = "RowStructure=/Script/EterniaEquipmentInventory.ETEquipmentSlot"))
 	TArray<FDataTableRowHandle> BlocksEquipmentSlotTypes;
 
-	static TArray<FETEquipmentSlot> UnpackDataTableRowArray(const TArray<FDataTableRowHandle>& Array);
+	static TArray<FETEquipmentSlotType> UnpackDataTableRowArray(const TArray<FDataTableRowHandle>& Array);
 };

@@ -4,37 +4,38 @@
 
 #include "CoreMinimal.h"
 #include "ActiveGameplayEffectHandle.h"
-#include "Data/EterniaInventoryItemDefinition.h"
+#include "ETInventoryComponentBase.h"
+#include "Data/ETInventoryItemDefinition.h"
 #include "UObject/Object.h"
-#include "EterniaInventoryEntry.generated.h"
+#include "ETInventoryEntry.generated.h"
 
 class IAbilitySystemInterface;
-class UEterniaInventoryEntry;
+class UETInventoryEntry;
 class UETInventoryComponent;
-class UEterniaInventoryItemDefinition;
+class UETInventoryItemDefinition;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UEterniaInventoryEntry*, UpdatedItem, int32, NewAmount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UEterniaInventoryEntry*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UETInventoryEntry*, UpdatedItem, int32, NewAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UETInventoryEntry*, Item);
 
 /**
  * 
  */
 UCLASS(BlueprintType)
-class ETERNIAEQUIPMENTINVENTORY_API UEterniaInventoryEntry : public UObject {
+class ETERNIAEQUIPMENTINVENTORY_API UETInventoryEntry : public UObject {
 	GENERATED_BODY()
 
 public:
 
-	UEterniaInventoryEntry(const FObjectInitializer& ObjectInitializer);
+	UETInventoryEntry(const FObjectInitializer& ObjectInitializer);
 
-	FORCEINLINE UEterniaInventoryItemDefinition* GetDefinition() const { return Definition; }
+	FORCEINLINE UETInventoryItemDefinition* GetDefinition() const { return Definition; }
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetAmount() const { return Amount; }
 
 	void IncrementAmount(int32 AmountToAdd);
 
-	void SetDefinition(UEterniaInventoryItemDefinition* Definition);
+	void SetDefinition(UETInventoryItemDefinition* Definition);
 
 	void SetAmount(int32 Am);
 
@@ -56,15 +57,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool IsRotated() const { return Rotated; }
 
-	FORCEINLINE UETInventoryComponent* GetOwningInventoryComponent() const { return OwningInventoryComponent; }
+	FORCEINLINE UETInventoryComponentBase* GetOwningInventoryComponent() const { return OwningInventoryComponent; }
 
-	void SetOwningInventoryComponent(UETInventoryComponent* InInventoryComponent);
+	void SetOwningInventoryComponent(UETInventoryComponentBase* InInventoryComponent);
 
 	UFUNCTION(BlueprintPure)
 	FORCEINLINE bool IsStackable() const { return Definition && Definition->IsStackable(); }
 
 	UFUNCTION(BlueprintPure)
-	bool IsSameItem(UEterniaInventoryEntry* Item) const;
+	bool IsSameItem(UETInventoryEntry* Item) const;
 
 	UFUNCTION(BlueprintPure)
 	bool IsStackFull() const;
@@ -76,12 +77,12 @@ public:
 	void Activate(AActor* ActivatorActor);
 
 	UFUNCTION(BlueprintCallable)
-	bool TryCombineWith(UEterniaInventoryEntry* ItemToCombineWith);
+	bool TryCombineWith(UETInventoryEntry* ItemToCombineWith);
 
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
-	UEterniaInventoryItemDefinition* Definition;
+	UETInventoryItemDefinition* Definition;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Amount;
@@ -90,9 +91,9 @@ protected:
 	bool Rotated;
 
 	UPROPERTY(BlueprintReadOnly)
-	UETInventoryComponent* OwningInventoryComponent;
+	TObjectPtr<UETInventoryComponentBase> OwningInventoryComponent;
 
 	FActiveGameplayEffectHandle InInventoryEffectHandle;
 
-	static UAbilitySystemComponent* FindAbilitySystemComponent(UETInventoryComponent* InventoryComponent);
+	static UAbilitySystemComponent* FindAbilitySystemComponent(UETInventoryComponentBase* InventoryComponent);
 };

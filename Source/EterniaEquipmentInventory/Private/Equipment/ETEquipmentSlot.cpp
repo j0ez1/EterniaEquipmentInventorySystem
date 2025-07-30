@@ -1,22 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Equipment/EquipmentSlot.h"
+#include "Equipment/ETEquipmentSlot.h"
 
-#include "Inventory/EterniaInventoryEntry.h"
+#include "Inventory/ETInventoryEntry.h"
 
-UEquipmentSlot::UEquipmentSlot(const FObjectInitializer& ObjectInitializer)
+UETEquipmentSlot::UETEquipmentSlot(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer),
 bIsActivatable(false), bIsBlocked(false){
 }
 
-bool UEquipmentSlot::TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
+bool UETEquipmentSlot::TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip, UETInventoryEntry*& RemainingItem) {
 	if (bIsBlocked) {
 		RemainingItem = NewItem;
 		return false;
 	}
 
-	UEterniaInventoryEntry* OccupyingItem = InventoryEntry;
+	UETInventoryEntry* OccupyingItem = InventoryEntry;
 	if (IsEmpty() || !InventoryEntry->IsSameItem(NewItem) && bForceEquip) {
 		bool bSuccess = DoSetItem(NewItem);
 		RemainingItem = bSuccess ? OccupyingItem : NewItem;
@@ -37,9 +37,9 @@ bool UEquipmentSlot::TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEq
 	return false;
 }
 
-bool UEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
-	FETEquipmentSlot Type = GetType();
-	for (FETEquipmentSlot ValidType : ItemType.GetValidEquipmentSlotTypes()) {
+bool UETEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
+	FETEquipmentSlotType Type = GetType();
+	for (FETEquipmentSlotType ValidType : ItemType.GetValidEquipmentSlotTypes()) {
 		if (ValidType == Type) {
 			return true;
 		}
@@ -47,25 +47,25 @@ bool UEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
 	return false;
 }
 
-UEterniaInventoryEntry* UEquipmentSlot::Clear(bool bSilent) {
-	UEterniaInventoryEntry* OldItem = InventoryEntry;
+UETInventoryEntry* UETEquipmentSlot::Clear(bool bSilent) {
+	UETInventoryEntry* OldItem = InventoryEntry;
 	if (InventoryEntry) {
-		InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
+		InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UETEquipmentSlot::HandleItemAmountChanged);
 	}
 	InventoryEntry = nullptr;
 	OnEquippedItemChanged.Broadcast(this, OldItem, bSilent);
 	return OldItem;
 }
 
-FETEquipmentSlot UEquipmentSlot::GetType() const {
-	FETEquipmentSlot* Row = SlotTypeRowHandle.GetRow<FETEquipmentSlot>("");
+FETEquipmentSlotType UETEquipmentSlot::GetType() const {
+	FETEquipmentSlotType* Row = SlotTypeRowHandle.GetRow<FETEquipmentSlotType>("");
 	if (Row) {
 		return *Row;
 	}
-	return FETEquipmentSlot();
+	return FETEquipmentSlotType();
 }
 
-void UEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
+void UETEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
 	if (bIsBlocked == InbIsBlocked) return;
 
 	bIsBlocked = InbIsBlocked;
@@ -75,15 +75,15 @@ void UEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
 	OnIsBlockedChanged.Broadcast(this);
 }
 
-bool UEquipmentSlot::DoSetItem(UEterniaInventoryEntry* NewItem) {
+bool UETEquipmentSlot::DoSetItem(UETInventoryEntry* NewItem) {
 	if (NewItem && NewItem != InventoryEntry && NewItem->GetDefinition()) {
 		if (IsValidForItemType(NewItem->GetDefinition()->GetItemType())) {
-			UEterniaInventoryEntry* OldItem = InventoryEntry;
+			UETInventoryEntry* OldItem = InventoryEntry;
 			if (InventoryEntry) {
-				InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
+				InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UETEquipmentSlot::HandleItemAmountChanged);
 			}
 			InventoryEntry = NewItem;
-			InventoryEntry->OnItemAmountChanged.AddUniqueDynamic(this, &UEquipmentSlot::HandleItemAmountChanged);
+			InventoryEntry->OnItemAmountChanged.AddUniqueDynamic(this, &UETEquipmentSlot::HandleItemAmountChanged);
 			OnEquippedItemChanged.Broadcast(this, OldItem, false);
 			return true;
 		}
@@ -91,7 +91,7 @@ bool UEquipmentSlot::DoSetItem(UEterniaInventoryEntry* NewItem) {
 	return false;
 }
 
-void UEquipmentSlot::HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount) {
+void UETEquipmentSlot::HandleItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount) {
 	if (InventoryEntry == UpdatedItem) {
 		if (NewAmount <= 0) {
 			Clear();

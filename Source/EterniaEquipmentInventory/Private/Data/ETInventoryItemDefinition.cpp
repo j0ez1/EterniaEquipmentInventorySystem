@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Data/EterniaInventoryItemDefinition.h"
+#include "Data/ETInventoryItemDefinition.h"
 
-UEterniaInventoryItemDefinition::UEterniaInventoryItemDefinition() {
+UETInventoryItemDefinition::UETInventoryItemDefinition() {
 }
 
-FETItemType UEterniaInventoryItemDefinition::GetItemType() const {
+FETItemType UETInventoryItemDefinition::GetItemType() const {
 	FETItemType* Row = ItemTypeRowHandle.GetRow<FETItemType>("");
 	if (Row) {
 		return *Row;

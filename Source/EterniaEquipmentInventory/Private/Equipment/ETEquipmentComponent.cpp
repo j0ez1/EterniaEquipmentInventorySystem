@@ -1,21 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Equipment/EterniaEquipmentComponent.h"
+#include "Equipment/ETEquipmentComponent.h"
 
-#include "Equipment/EquipmentSlot.h"
-#include "Inventory/EterniaInventoryEntry.h"
+#include "Equipment/ETEquipmentSlot.h"
+#include "Inventory/ETInventoryEntry.h"
 
-UEterniaEquipmentComponent::UEterniaEquipmentComponent() {
+UETEquipmentComponent::UETEquipmentComponent() {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryEntry, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem) {
+bool UETEquipmentComponent::TryEquipItem(UETInventoryEntry* InventoryEntry, bool bForceEquip, UETInventoryEntry*& RemainingItem) {
 	if (InventoryEntry && InventoryEntry->GetDefinition()) {
-		TArray<UEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
+		TArray<UETEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetItemType());
 
 		// Try empty slots first regardless of bForceEquip ...
-		for (UEquipmentSlot* Slot : FoundSlots) {
+		for (UETEquipmentSlot* Slot : FoundSlots) {
 			if (Slot->IsEmpty()) {
 				if (Slot->TryEquipItem(InventoryEntry, bForceEquip, RemainingItem)) {
 					return true;
@@ -24,7 +24,7 @@ bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryE
 		}
 
 		// ... then try occupied slots
-		for (UEquipmentSlot* Slot : FoundSlots) {
+		for (UETEquipmentSlot* Slot : FoundSlots) {
 			if (!Slot->IsEmpty()) {
 				if (Slot->TryEquipItem(InventoryEntry, bForceEquip, RemainingItem)) {
 					return true;
@@ -35,7 +35,7 @@ bool UEterniaEquipmentComponent::TryEquipItem(UEterniaInventoryEntry* InventoryE
 	return false;
 }
 
-UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByName(const FName& Name) const {
+UETEquipmentSlot* UETEquipmentComponent::FindSlotByName(const FName& Name) const {
 	for (auto EquipmentSlot : Slots) {
 		if (EquipmentSlot->GetSlotName() == Name) {
 			return EquipmentSlot;
@@ -44,7 +44,7 @@ UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByName(const FName& Name) co
 	return nullptr;
 }
 
-UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByType(const FETEquipmentSlot& SlotType) const {
+UETEquipmentSlot* UETEquipmentComponent::FindSlotByType(const FETEquipmentSlotType& SlotType) const {
 	for (auto EquipmentSlot : Slots) {
 		if (EquipmentSlot->GetType() == SlotType) {
 			return EquipmentSlot;
@@ -53,8 +53,8 @@ UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByType(const FETEquipmentSlo
 	return nullptr;
 }
 
-TArray<UEquipmentSlot*> UEterniaEquipmentComponent::FindAllValidSlotsForItemType(const FETItemType& ItemType) const {
-	TArray<UEquipmentSlot*> ResultArray;
+TArray<UETEquipmentSlot*> UETEquipmentComponent::FindAllValidSlotsForItemType(const FETItemType& ItemType) const {
+	TArray<UETEquipmentSlot*> ResultArray;
 	for (auto EquipmentSlot : Slots) {
 		if (EquipmentSlot->IsValidForItemType(ItemType)) {
 			ResultArray.Add(EquipmentSlot);
@@ -63,7 +63,7 @@ TArray<UEquipmentSlot*> UEterniaEquipmentComponent::FindAllValidSlotsForItemType
 	return ResultArray;
 }
 
-UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByInputAction(const UInputAction* InputAction) const {
+UETEquipmentSlot* UETEquipmentComponent::FindSlotByInputAction(const UInputAction* InputAction) const {
 	for (auto EquipmentSlot : Slots) {
 		if (EquipmentSlot->GetInputAction() == InputAction) {
 			return EquipmentSlot;
@@ -72,21 +72,21 @@ UEquipmentSlot* UEterniaEquipmentComponent::FindSlotByInputAction(const UInputAc
 	return nullptr;
 }
 
-void UEterniaEquipmentComponent::BeginPlay() {
+void UETEquipmentComponent::BeginPlay() {
 	Super::BeginPlay();
 
 	for (auto Slot : Slots) {
-		Slot->OnEquippedItemChanged.AddDynamic(this, &UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot);
+		Slot->OnEquippedItemChanged.AddDynamic(this, &UETEquipmentComponent::OnEquippedItemChanged_EquipmentSlot);
 	}
 }
 
-void UEterniaEquipmentComponent::UpdateSlotBlockState() {
+void UETEquipmentComponent::UpdateSlotBlockState() {
 	TMap<FName, int32> BlockedSlotTypesMap;
-	for (UEquipmentSlot* Slot : Slots) {
-		UEterniaInventoryEntry* OccupyingItem = Slot->GetInventoryEntry();
+	for (UETEquipmentSlot* Slot : Slots) {
+		UETInventoryEntry* OccupyingItem = Slot->GetInventoryEntry();
 		if (OccupyingItem && OccupyingItem->GetDefinition()) {
-			TArray<FETEquipmentSlot> SlotTypesToBlock = OccupyingItem->GetDefinition()->GetItemType().GetBlocksEquipmentSlotTypes();
-			for (const FETEquipmentSlot& SlotType : SlotTypesToBlock) {
+			TArray<FETEquipmentSlotType> SlotTypesToBlock = OccupyingItem->GetDefinition()->GetItemType().GetBlocksEquipmentSlotTypes();
+			for (const FETEquipmentSlotType& SlotType : SlotTypesToBlock) {
 				if (BlockedSlotTypesMap.Contains(SlotType.Identifier)) {
 					BlockedSlotTypesMap[SlotType.Identifier]++;
 				} else {
@@ -96,7 +96,7 @@ void UEterniaEquipmentComponent::UpdateSlotBlockState() {
 		}
 	}
 
-	for (UEquipmentSlot* Slot : Slots) {
+	for (UETEquipmentSlot* Slot : Slots) {
 		if (Slot->IsEmpty()) {
 			if (BlockedSlotTypesMap.Contains(Slot->GetType().Identifier)) {
 				BlockedSlotTypesMap[Slot->GetType().Identifier]--;
@@ -110,7 +110,7 @@ void UEterniaEquipmentComponent::UpdateSlotBlockState() {
 		}
 	}
 
-	for (UEquipmentSlot* Slot : Slots) {
+	for (UETEquipmentSlot* Slot : Slots) {
 		if (!Slot->IsEmpty()) {
 			if (BlockedSlotTypesMap.Contains(Slot->GetType().Identifier)) {
 				BlockedSlotTypesMap[Slot->GetType().Identifier]--;
@@ -125,6 +125,6 @@ void UEterniaEquipmentComponent::UpdateSlotBlockState() {
 	}
 }
 
-void UEterniaEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UEquipmentSlot* Slot, UEterniaInventoryEntry* OldItem, bool bSilent) {
+void UETEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UETEquipmentSlot* Slot, UETInventoryEntry* OldItem, bool bSilent) {
 	UpdateSlotBlockState();
 }

@@ -3,29 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ETInventoryComponentBase.h"
 #include "UObject/Interface.h"
-#include "PickupInterface.generated.h"
+#include "ETInventoryInterface.generated.h"
 
-class UETInventoryComponent;
-
+class UETInventoryComponentBase;
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
-class UPickupInterface : public UInterface
-{
+UINTERFACE()
+class ETERNIAEQUIPMENTINVENTORY_API UInventoryInterface : public UInterface {
 	GENERATED_BODY()
 };
 
 /**
  * 
  */
-class ETERNIAEQUIPMENTINVENTORY_API IPickupInterface
-{
+class ETERNIAEQUIPMENTINVENTORY_API IInventoryInterface {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void AddPickupToInventory(UETInventoryComponentBase* InventoryComponent) = 0;
-
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Inventory")
+	UETInventoryComponentBase* GetInventoryComponent() const;
 };

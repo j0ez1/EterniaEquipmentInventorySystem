@@ -1,51 +1,51 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Inventory/EterniaInventoryEntry.h"
+#include "Inventory/ETInventoryEntry.h"
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
 #include "Combination/ETCombinationBlueprintLibrary.h"
 #include "Inventory/ETInventoryComponent.h"
-#include "Data/EterniaInventoryItemDefinition.h"
+#include "Data/ETInventoryItemDefinition.h"
 #include "Inventory/ETInventoryStatics.h"
 
 
-UEterniaInventoryEntry::UEterniaInventoryEntry(const FObjectInitializer& ObjectInitializer)
+UETInventoryEntry::UETInventoryEntry(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, Amount(0)
 	, Rotated(false) {
 }
 
-void UEterniaInventoryEntry::IncrementAmount(int32 AmountToAdd) {
+void UETInventoryEntry::IncrementAmount(int32 AmountToAdd) {
 	Amount += AmountToAdd;
 }
 
-void UEterniaInventoryEntry::SetDefinition(UEterniaInventoryItemDefinition* Def) {
+void UETInventoryEntry::SetDefinition(UETInventoryItemDefinition* Def) {
 	Definition = Def;
 }
 
-void UEterniaInventoryEntry::SetAmount(int32 Am) {
+void UETInventoryEntry::SetAmount(int32 Am) {
 	Amount = IsStackable() ? FMath::Clamp(Am, 0, Definition->GetStackSize()) : 1;
 	OnItemAmountChanged.Broadcast(this, Amount);
 }
 
-FIntPoint UEterniaInventoryEntry::GetDimensions() {
+FIntPoint UETInventoryEntry::GetDimensions() {
 	FIntPoint Dimensions = Definition->GetDimensions();
 	return Rotated ? FIntPoint(Dimensions.Y, Dimensions.X) : Dimensions;
 }
 
-UMaterialInterface* UEterniaInventoryEntry::GetImage() {
+UMaterialInterface* UETInventoryEntry::GetImage() {
 	return Rotated ? Definition->GetImageRotated() : Definition->GetImage();
 }
 
-void UEterniaInventoryEntry::Rotate() {
+void UETInventoryEntry::Rotate() {
 	Rotated = !Rotated;
 	OnItemRotated.Broadcast(this);
 }
 
-void UEterniaInventoryEntry::SetOwningInventoryComponent(UETInventoryComponent* InInventoryComponent) {
+void UETInventoryEntry::SetOwningInventoryComponent(UETInventoryComponentBase* InInventoryComponent) {
 	if (OwningInventoryComponent == InInventoryComponent) return;
 
 	UAbilitySystemComponent* ASC = FindAbilitySystemComponent(OwningInventoryComponent);
@@ -69,14 +69,14 @@ void UEterniaInventoryEntry::SetOwningInventoryComponent(UETInventoryComponent* 
 	}
 }
 
-bool UEterniaInventoryEntry::IsSameItem(UEterniaInventoryEntry* Item) const {
+bool UETInventoryEntry::IsSameItem(UETInventoryEntry* Item) const {
 	if (!Item || !Item->GetDefinition() || !Definition) {
 		return false;
 	}
 	return Item->GetDefinition()->GetItemID().IsEqual(Definition->GetItemID());
 }
 
-bool UEterniaInventoryEntry::IsStackFull() const {
+bool UETInventoryEntry::IsStackFull() const {
 	if (!Definition) {
 		return true;
 	}
@@ -86,7 +86,7 @@ bool UEterniaInventoryEntry::IsStackFull() const {
 	return GetAmount() >= Definition->GetStackSize();
 }
 
-int32 UEterniaInventoryEntry::GetStackLimit() const {
+int32 UETInventoryEntry::GetStackLimit() const {
 	if (!Definition) {
 		return 0;
 	}
@@ -96,7 +96,7 @@ int32 UEterniaInventoryEntry::GetStackLimit() const {
 	return FMath::Max(0, Definition->GetStackSize() - GetAmount());
 }
 
-void UEterniaInventoryEntry::Activate(AActor* ActivatorActor) {
+void UETInventoryEntry::Activate(AActor* ActivatorActor) {
 	if (OwningInventoryComponent && Definition && Definition->IsConsumable()) {
 		TSubclassOf<UGameplayEffect> EffectClass = Definition->GetConsumeEffect();
 		if (ActivatorActor && ActivatorActor->Implements<UAbilitySystemInterface>() && EffectClass) {
@@ -107,26 +107,26 @@ void UEterniaInventoryEntry::Activate(AActor* ActivatorActor) {
 		}
 		SetAmount(Amount - 1);
 		FName ConsumeReplaceItemID = Definition->GetConsumeReplaceItemID();
-		UEterniaInventoryItemDefinition* ReplaceItemDef = UETInventoryStatics::FindItemDefinitionByID(this, ConsumeReplaceItemID);
-		UEterniaInventoryEntry* ItemToAdd = UETInventoryStatics::CreateItemByDefinition(ReplaceItemDef, OwningInventoryComponent);
+		UETInventoryItemDefinition* ReplaceItemDef = UETInventoryStatics::FindItemDefinitionByID(this, ConsumeReplaceItemID);
+		UETInventoryEntry* ItemToAdd = UETInventoryStatics::CreateItemByDefinition(ReplaceItemDef, OwningInventoryComponent);
 		OwningInventoryComponent->TryAddItem(ItemToAdd);
 	}
 }
 
-bool UEterniaInventoryEntry::TryCombineWith(UEterniaInventoryEntry* ItemToCombineWith) {
+bool UETInventoryEntry::TryCombineWith(UETInventoryEntry* ItemToCombineWith) {
 	FCombinationResult CombinationResult;
 	if (UETCombinationBlueprintLibrary::CanCombineItems(this, this, ItemToCombineWith, CombinationResult)) {
 		SetAmount(GetAmount() - 1);
 		ItemToCombineWith->SetAmount(ItemToCombineWith->GetAmount() - 1);
 
 		// TODO Extract item creation code?
-		UEterniaInventoryItemDefinition* ResultItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.ResultId);
-		UEterniaInventoryEntry* ResultItem = UETInventoryStatics::CreateItemByDefinition(ResultItemDef, ItemToCombineWith->GetOwningInventoryComponent());
+		UETInventoryItemDefinition* ResultItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.ResultId);
+		UETInventoryEntry* ResultItem = UETInventoryStatics::CreateItemByDefinition(ResultItemDef, ItemToCombineWith->GetOwningInventoryComponent());
 		bool bTryAddItem = ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(ResultItem);
 
 		if (CombinationResult.RemainderId != NAME_None) {
-			UEterniaInventoryItemDefinition* RemainderItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.RemainderId);
-			UEterniaInventoryEntry* RemainderItem = UETInventoryStatics::CreateItemByDefinition(RemainderItemDef, ItemToCombineWith->GetOwningInventoryComponent());
+			UETInventoryItemDefinition* RemainderItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.RemainderId);
+			UETInventoryEntry* RemainderItem = UETInventoryStatics::CreateItemByDefinition(RemainderItemDef, ItemToCombineWith->GetOwningInventoryComponent());
 			bTryAddItem = bTryAddItem && ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(RemainderItem);
 		}
 
@@ -135,7 +135,7 @@ bool UEterniaInventoryEntry::TryCombineWith(UEterniaInventoryEntry* ItemToCombin
 	return false;
 }
 
-UAbilitySystemComponent* UEterniaInventoryEntry::FindAbilitySystemComponent(UETInventoryComponent* InventoryComponent) {
+UAbilitySystemComponent* UETInventoryEntry::FindAbilitySystemComponent(UETInventoryComponentBase* InventoryComponent) {
 	if (InventoryComponent) {
 		AActor* Owner = InventoryComponent->GetOwner();
 		if (Owner && Owner->Implements<UAbilitySystemInterface>()) {

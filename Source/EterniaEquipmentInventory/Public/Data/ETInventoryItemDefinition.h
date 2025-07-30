@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EquipmentTypes.h"
-#include "EterniaInventoryItemDefinition.generated.h"
+#include "ETInventoryItemDefinition.generated.h"
 
 class UGameplayEffect;
 
@@ -69,12 +69,12 @@ struct FEtItemDefinition : public FTableRowBase {
  * 
  */
 UCLASS(BlueprintType, EditInlineNew)
-class ETERNIAEQUIPMENTINVENTORY_API UEterniaInventoryItemDefinition : public UObject {
+class ETERNIAEQUIPMENTINVENTORY_API UETInventoryItemDefinition : public UObject {
 	GENERATED_BODY()
 
 public:
 
-	UEterniaInventoryItemDefinition();
+	UETInventoryItemDefinition();
 
 	FORCEINLINE FName GetItemID() const { return ItemID; }
 
@@ -109,8 +109,8 @@ public:
 
 	FORCEINLINE TSoftClassPtr<UGameplayEffect> GetInInventoryEffect() const { return InInventoryEffect; }
 
-	static UEterniaInventoryItemDefinition* Convert(const FEtItemDefinition& DTDef) {
-		UEterniaInventoryItemDefinition* Result = NewObject<UEterniaInventoryItemDefinition>();
+	static UETInventoryItemDefinition* Convert(const FEtItemDefinition& DTDef) {
+		UETInventoryItemDefinition* Result = NewObject<UETInventoryItemDefinition>();
 		Result->ItemID = DTDef.ItemID;
 		Result->ItemName = DTDef.ItemName;
 		Result->ItemTypeRowHandle = DTDef.ItemType;

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/EterniaInventoryItemDefinition.h"
+#include "Data/ETInventoryItemDefinition.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ETEquipmentInventorySubsystem.generated.h"
 
@@ -22,7 +22,7 @@ public:
 
 	FORCEINLINE UDataTable* GetItemCombinationDataTable() const { return ItemCombinationDataTable.LoadSynchronous(); }
 
-	UEterniaInventoryItemDefinition* FindItemDefinitionById(FName ItemID);
+	UETInventoryItemDefinition* FindItemDefinitionById(FName ItemID);
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 

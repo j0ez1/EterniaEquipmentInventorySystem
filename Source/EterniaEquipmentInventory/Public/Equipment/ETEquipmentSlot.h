@@ -5,29 +5,29 @@
 #include "CoreMinimal.h"
 #include "Data/EquipmentTypes.h"
 #include "UObject/Object.h"
-#include "EquipmentSlot.generated.h"
+#include "ETEquipmentSlot.generated.h"
 
 class IAbilitySystemInterface;
 class UInputAction;
-class UEterniaInventoryEntry;
+class UETInventoryEntry;
 
 // FIXME bSilent usage is an ugly approach but it is needed for dependent code. Find a way to get rid of it
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged, UEquipmentSlot*, Slot, UEterniaInventoryEntry*, OldItem, bool, bSilent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UEquipmentSlot*, Slot);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged, UETEquipmentSlot*, Slot, UETInventoryEntry*, OldItem, bool, bSilent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UETEquipmentSlot*, Slot);
 
 /**
  * 
  */
 UCLASS(BlueprintType, EditInlineNew)
-class ETERNIAEQUIPMENTINVENTORY_API UEquipmentSlot : public UObject {
+class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentSlot : public UObject {
 	GENERATED_BODY()
 
 public:
 
-	UEquipmentSlot(const FObjectInitializer& ObjectInitializer);
+	UETEquipmentSlot(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	bool TryEquipItem(UEterniaInventoryEntry* NewItem, bool bForceEquip, UEterniaInventoryEntry*& RemainingItem);
+	bool TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip, UETInventoryEntry*& RemainingItem);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsValidForItemType(const FETItemType& ItemType) const;
@@ -36,11 +36,11 @@ public:
 	bool IsEmpty() const { return InventoryEntry == nullptr; }
 
 	UFUNCTION(BlueprintCallable)
-	UEterniaInventoryEntry* Clear(bool bSilent = false);
+	UETInventoryEntry* Clear(bool bSilent = false);
 
 #pragma region GettersSetters
 
-	FORCEINLINE UEterniaInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
+	FORCEINLINE UETInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
 
 	FORCEINLINE FName GetSlotName() const { return SlotName; }
 
@@ -49,7 +49,7 @@ public:
 	FORCEINLINE bool IsActivatable() const { return bIsActivatable; }
 
 	UFUNCTION(BlueprintCallable)
-	FETEquipmentSlot GetType() const;
+	FETEquipmentSlotType GetType() const;
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool IsBlocked() const { return bIsBlocked; }
@@ -72,7 +72,7 @@ public:
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
-	UEterniaInventoryEntry* InventoryEntry;
+	UETInventoryEntry* InventoryEntry;
 
 	UPROPERTY(EditDefaultsOnly)
 	FName SlotName;
@@ -89,8 +89,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bIsActivatable"))
 	UInputAction* InputAction;
 
-	bool DoSetItem(UEterniaInventoryEntry* NewItem);
+	bool DoSetItem(UETInventoryEntry* NewItem);
 
 	UFUNCTION()
-	void HandleItemAmountChanged(UEterniaInventoryEntry* UpdatedItem, int32 NewAmount);
+	void HandleItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount);
 };
