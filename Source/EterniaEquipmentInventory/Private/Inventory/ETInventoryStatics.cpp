@@ -7,7 +7,6 @@
 #include "Helpers/ETLogging.h"
 #include "Inventory/ETInventoryEntry.h"
 #include "Data/ETInventoryItemDefinition.h"
-#include "Inventory/ETInventoryComponent.h"
 
 UETInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass) {
 	UDataTable* ItemDataTable = GetItemDataTable(WorldContextObject);

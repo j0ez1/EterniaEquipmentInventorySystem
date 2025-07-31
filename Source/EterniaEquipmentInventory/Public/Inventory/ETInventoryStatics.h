@@ -7,7 +7,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ETInventoryStatics.generated.h"
 
-class UETInventoryComponent;
 class UETInventoryEntry;
 class UETInventoryItemDefinition;
 /**

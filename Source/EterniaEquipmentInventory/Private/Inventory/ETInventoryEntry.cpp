@@ -7,7 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
 #include "Combination/ETCombinationBlueprintLibrary.h"
-#include "Inventory/ETInventoryComponent.h"
+#include "Inventory/ETTileInventoryComponent.h"
 #include "Data/ETInventoryItemDefinition.h"
 #include "Inventory/ETInventoryStatics.h"
 

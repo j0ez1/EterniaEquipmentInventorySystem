@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Inventory/ETInventoryComponent.h"
+#include "Inventory/ETTileInventoryComponent.h"
 
 #include "Helpers/ETLogging.h"
 #include "Inventory/ETInventoryEntry.h"
@@ -9,21 +9,20 @@
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
-UETInventoryComponent::UETInventoryComponent(const FObjectInitializer& ObjectInitializer)
+UETTileInventoryComponent::UETTileInventoryComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, Rows(1)
-	, Columns(1)
-	, Money(0) {
+	, Columns(1) {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UETInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+void UETTileInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
 
 	Inventory.Empty();
 }
 
-bool UETInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
+bool UETTileInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
 	if (!ItemToAdd) {
 		EEIS_ULOG_ERROR(TEXT("Inventory entry to add is null"))
 		return false;
@@ -68,7 +67,7 @@ bool UETInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
 	return false;
 }
 
-bool UETInventoryComponent::TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile) {
+bool UETTileInventoryComponent::TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile) {
 	if (!ItemToAdd) return false;
 
 	bool bResult = false;
@@ -110,13 +109,13 @@ bool UETInventoryComponent::TryAddItemAt(UETInventoryEntry* ItemToAdd, const FIn
 	return bResult;
 }
 
-bool UETInventoryComponent::RemoveItem(UETInventoryEntry* EntryToRemove) {
+bool UETTileInventoryComponent::RemoveItem(UETInventoryEntry* EntryToRemove) {
 	bool bItemRemoved = false;
 	if (EntryToRemove) {
 		for (int i = 0; i < Inventory.Num(); ++i) {
 			TObjectPtr<UETInventoryEntry> ExistingEntry = Inventory[i];
 			if (ExistingEntry == EntryToRemove) {
-				ExistingEntry->OnItemAmountChanged.RemoveDynamic(this, &UETInventoryComponent::OnItemAmountChanged);
+				ExistingEntry->OnItemAmountChanged.RemoveDynamic(this, &UETTileInventoryComponent::OnItemAmountChanged);
 				Inventory[i] = nullptr;
 				Items.Remove(ExistingEntry);
 				bItemRemoved = true;
@@ -129,7 +128,7 @@ bool UETInventoryComponent::RemoveItem(UETInventoryEntry* EntryToRemove) {
 	return bItemRemoved;
 }
 
-TMap<UETInventoryEntry*, FInventoryTile> UETInventoryComponent::GetAllItems() const {
+TMap<UETInventoryEntry*, FInventoryTile> UETTileInventoryComponent::GetAllItems() const {
 	TMap<UETInventoryEntry*, FInventoryTile> AllItems;
 	for (int i = 0; i < Inventory.Num(); ++i) {
 		UETInventoryEntry* Item = Inventory[i];
@@ -140,7 +139,7 @@ TMap<UETInventoryEntry*, FInventoryTile> UETInventoryComponent::GetAllItems() co
 	return AllItems;
 }
 
-bool UETInventoryComponent::GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const {
+bool UETTileInventoryComponent::GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const {
 	for (int i = 0; i < Rows; ++i) {
 		for (int j = 0; j < Columns; ++j) {
 			if (Inventory[i * Columns + j] == Item) {
@@ -152,17 +151,17 @@ bool UETInventoryComponent::GetItemTopLeftTile(UETInventoryEntry* Item, FInvento
 	return false;
 }
 
-void UETInventoryComponent::BeginPlay() {
+void UETTileInventoryComponent::BeginPlay() {
 	Inventory.Init(nullptr, Rows * Columns);
 	
 	Super::BeginPlay();
 }
 
-bool UETInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const {
+bool UETTileInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const {
 	return IsRoomAvailable(ItemToCheck, IndexToTile(TopLeftIndex));
 }
 
-bool UETInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const {
+bool UETTileInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const {
 	if (!ItemToCheck) {
 		return false;
 	}
@@ -192,19 +191,19 @@ bool UETInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, cons
 	return true;
 }
 
-FInventoryTile UETInventoryComponent::IndexToTile(int32 Index) const {
+FInventoryTile UETTileInventoryComponent::IndexToTile(int32 Index) const {
 	return FInventoryTile(Index % Columns, Index / Columns);
 }
 
-int32 UETInventoryComponent::TileToIndex(const FInventoryTile& Tile) const {
+int32 UETTileInventoryComponent::TileToIndex(const FInventoryTile& Tile) const {
 	return Tile.X + Tile.Y * Columns;
 }
 
-bool UETInventoryComponent::IsTileValid(const FInventoryTile& Tile) const {
+bool UETTileInventoryComponent::IsTileValid(const FInventoryTile& Tile) const {
 	return Tile.X >= 0 && Tile.Y >= 0 && Tile.X < Columns && Tile.Y < Rows;
 }
 
-bool UETInventoryComponent::GetItemAtIndex(int32 Index, UETInventoryEntry*& Item) const {
+bool UETTileInventoryComponent::GetItemAtIndex(int32 Index, UETInventoryEntry*& Item) const {
 	if (Inventory.IsValidIndex(Index)) {
 		Item = Inventory[Index].Get();
 		return true;
@@ -212,21 +211,21 @@ bool UETInventoryComponent::GetItemAtIndex(int32 Index, UETInventoryEntry*& Item
 	return false;
 }
 
-bool UETInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const {
+bool UETTileInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const {
 	return GetItemAtIndex(TileToIndex(Tile), Item);
 }
 
-void UETInventoryComponent::AddItemAt(UETInventoryEntry* Item, int32 TopLeftIndex) {
+void UETTileInventoryComponent::AddItemAt(UETInventoryEntry* Item, int32 TopLeftIndex) {
 	AddItemAt(Item, IndexToTile(TopLeftIndex));
 }
 
-void UETInventoryComponent::OnItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount) {
+void UETTileInventoryComponent::OnItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount) {
 	if (NewAmount <= 0) {
 		RemoveItem(UpdatedItem);
 	}
 }
 
-void UETInventoryComponent::AddItemAt(UETInventoryEntry* Item, const FInventoryTile& TopLeftTile) {
+void UETTileInventoryComponent::AddItemAt(UETInventoryEntry* Item, const FInventoryTile& TopLeftTile) {
 	if (Item) {
 		Items.Add(Item);
 		Item->SetOwningInventoryComponent(this);
@@ -242,6 +241,6 @@ void UETInventoryComponent::AddItemAt(UETInventoryEntry* Item, const FInventoryT
 			}
 		}
 		OnItemAdded.Broadcast(Item);
-		Item->OnItemAmountChanged.AddUniqueDynamic(this, &UETInventoryComponent::OnItemAmountChanged);
+		Item->OnItemAmountChanged.AddUniqueDynamic(this, &UETTileInventoryComponent::OnItemAmountChanged);
 	}
 }

@@ -11,7 +11,6 @@
 
 class IAbilitySystemInterface;
 class UETInventoryEntry;
-class UETInventoryComponent;
 class UETInventoryItemDefinition;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UETInventoryEntry*, UpdatedItem, int32, NewAmount);

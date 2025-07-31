@@ -19,7 +19,7 @@ class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentComponent : public UActorCompone
 
 public:
 
-	UETEquipmentComponent();
+	UETEquipmentComponent(const FObjectInitializer& ObjectInitializer);
 
 	/*
 	 * Try to equip item to first valid empty slot or if bForceEquip == true then try to replace an item in first valid occupied slot  

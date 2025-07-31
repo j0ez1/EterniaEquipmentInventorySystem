@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "ETInventoryComponentBase.h"
-#include "ETInventoryComponent.generated.h"
+#include "ETTileInventoryComponent.generated.h"
 
 
-class UETInventoryComponent;
+class UETTileInventoryComponent;
 class UEterniaItemDatabase;
 class UETInventoryEntry;
 class UETInventoryItemDefinition;
@@ -36,12 +36,12 @@ struct FInventoryTile {
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMoneyCountChangedSignature, float);
 
 UCLASS(ClassGroup=(Eternia), meta=(BlueprintSpawnableComponent))
-class ETERNIAEQUIPMENTINVENTORY_API UETInventoryComponent : public UETInventoryComponentBase {
+class ETERNIAEQUIPMENTINVENTORY_API UETTileInventoryComponent : public UETInventoryComponentBase {
 	GENERATED_BODY()
 
 public:
 
-	UETInventoryComponent(const FObjectInitializer& ObjectInitializer);
+	UETTileInventoryComponent(const FObjectInitializer& ObjectInitializer);
 
 	bool TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile);
 
@@ -49,8 +49,6 @@ public:
 	TMap<UETInventoryEntry*, FInventoryTile> GetAllItems() const;
 
 	bool GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const;
-
-	FOnMoneyCountChangedSignature OnMoneyChanged;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const;
@@ -61,9 +59,9 @@ public:
 
 	bool GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const;
 
-#pragma region Getters
+	FOnMoneyCountChangedSignature OnMoneyChanged;
 
-	FORCEINLINE int32 GetMoney() const { return Money; }
+#pragma region Getters
 
 	FORCEINLINE int32 GetRows() const { return Rows; }
 
@@ -95,9 +93,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Columns;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 Money;
 
 	FInventoryTile IndexToTile(int32 Index) const;
 

@@ -57,9 +57,15 @@ public:
 
 	FOnInventoryInitialized OnInventoryInitialized;
 
+#pragma region UActorComponent
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+#pragma endregion // UActorComponent
+
 protected:
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Replicated)
 	TArray<TObjectPtr<UETInventoryEntry>> Items;
 
 	// Items to be added to inventory on BeginPlay
