@@ -5,9 +5,9 @@
 
 #include "Inventory/ETInventoryEntry.h"
 
-UETEquipmentSlot::UETEquipmentSlot(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer),
-bIsActivatable(false), bIsBlocked(false){
+UETEquipmentSlot::UETEquipmentSlot(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer),
+	bIsActivatable(false), bIsBlocked(false) {
 }
 
 bool UETEquipmentSlot::TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip, UETInventoryEntry*& RemainingItem) {
@@ -66,7 +66,8 @@ FETEquipmentSlotType UETEquipmentSlot::GetType() const {
 }
 
 void UETEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
-	if (bIsBlocked == InbIsBlocked) return;
+	if (bIsBlocked == InbIsBlocked)
+		return;
 
 	bIsBlocked = InbIsBlocked;
 	if (bIsBlocked) {

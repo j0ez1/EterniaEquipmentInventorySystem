@@ -9,7 +9,7 @@
 UETEquipmentComponent::UETEquipmentComponent(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer) {
 	PrimaryComponentTick.bCanEverTick = false;
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 }
 
 bool UETEquipmentComponent::TryEquipItem(UETInventoryEntry* InventoryEntry, bool bForceEquip, UETInventoryEntry*& RemainingItem) {

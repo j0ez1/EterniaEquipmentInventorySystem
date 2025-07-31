@@ -15,7 +15,7 @@ struct FEtItemDefinition;
 UETInventoryComponentBase::UETInventoryComponentBase(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer) {
 	PrimaryComponentTick.bCanEverTick = false;
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 }
 
 void UETInventoryComponentBase::SwapItems(UETInventoryEntry* EntryToRemove, UETInventoryEntry* EntryToAdd) {

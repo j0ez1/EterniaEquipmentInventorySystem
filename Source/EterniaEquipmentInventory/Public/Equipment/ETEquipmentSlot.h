@@ -12,7 +12,7 @@ class UInputAction;
 class UETInventoryEntry;
 
 // FIXME bSilent usage is an ugly approach but it is needed for dependent code. Find a way to get rid of it
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged, UETEquipmentSlot*, Slot, UETInventoryEntry*, OldItem, bool, bSilent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged_EquipmentSlot, UETEquipmentSlot*, Slot, UETInventoryEntry*, OldItem, bool, bSilent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UETEquipmentSlot*, Slot);
 
 /**
@@ -62,7 +62,7 @@ public:
 #pragma region Delegates
 
 	UPROPERTY(BlueprintAssignable)
-	FOnEquippedItemChanged OnEquippedItemChanged;
+	FOnEquippedItemChanged_EquipmentSlot OnEquippedItemChanged;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnIsBlockedChanged_EquipmentSlot OnIsBlockedChanged;
@@ -77,7 +77,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	FName SlotName;
 
-	UPROPERTY(EditDefaultsOnly, meta=(RequiredAssetDataTags="RowStructure=/Script/EterniaEquipmentInventory.ETEquipmentSlot"))
+	UPROPERTY(EditDefaultsOnly, meta=(RequiredAssetDataTags="RowStructure=/Script/EterniaEquipmentInventory.ETEquipmentSlotType"))
 	FDataTableRowHandle SlotTypeRowHandle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
