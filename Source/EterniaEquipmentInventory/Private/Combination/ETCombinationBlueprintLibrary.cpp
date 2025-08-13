@@ -4,6 +4,7 @@
 #include "Combination/ETCombinationBlueprintLibrary.h"
 
 #include "ETEquipmentInventorySubsystem.h"
+#include "Data/ETDAItemDefinition.h"
 #include "Inventory/ETInventoryEntry.h"
 
 bool UETCombinationBlueprintLibrary::CanCombineItems(UObject* WorldContextObject,

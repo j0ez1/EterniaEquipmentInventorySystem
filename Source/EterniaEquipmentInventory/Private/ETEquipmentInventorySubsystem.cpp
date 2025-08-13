@@ -4,7 +4,8 @@
 #include "ETEquipmentInventorySubsystem.h"
 
 #include "ETEquipmentInventorySettings.h"
-#include "Helpers/ETLogging.h"
+#include "Data/ETDAItemDefinition.h"
+#include "Inventory/ETInventoryStatics.h"
 
 UETEquipmentInventorySubsystem* UETEquipmentInventorySubsystem::GetCurrent(UObject* WorldContextObject) {
 	UWorld* World = Cast<UWorld>(WorldContextObject);
@@ -25,23 +26,6 @@ UETEquipmentInventorySubsystem* UETEquipmentInventorySubsystem::GetCurrent(UObje
 void UETEquipmentInventorySubsystem::Initialize(FSubsystemCollectionBase& Collection) {
 	const UETEquipmentInventorySettings* Settings = GetDefault<UETEquipmentInventorySettings>();
 	if (Settings) {
-		ItemDatabase = Settings->ItemDatabase;
 		ItemCombinationDataTable = Settings->ItemCombinationDataTable;
 	}
-}
-
-UETInventoryItemDefinition* UETEquipmentInventorySubsystem::FindItemDefinitionById(FName ItemID) {
-	if (!ItemDatabase || !ItemDatabase.LoadSynchronous()) {
-		EEIS_ULOGS_ERROR(TEXT("Item DataTable is null"))
-		return nullptr;
-	}
-
-	TArray<FEtItemDefinition*> OutRowArray;
-	ItemDatabase->GetAllRows<FEtItemDefinition>("", OutRowArray);
-	for (const FEtItemDefinition* Definition : OutRowArray) {
-		if (Definition && Definition->ItemID == ItemID) {
-			return UETInventoryItemDefinition::Convert(*Definition);
-		}
-	}
-	return nullptr;
 }

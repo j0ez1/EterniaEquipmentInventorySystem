@@ -3,16 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/EquipmentTypes.h"
+#include "Data/ETDAItemType.h"
 #include "UObject/Object.h"
 #include "ETEquipmentSlot.generated.h"
 
+class UETDAEquipmentSlotType;
 class IAbilitySystemInterface;
 class UInputAction;
 class UETInventoryEntry;
 
 // FIXME bSilent usage is an ugly approach but it is needed for dependent code. Find a way to get rid of it
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged_EquipmentSlot, UETEquipmentSlot*, Slot, UETInventoryEntry*, OldItem, bool, bSilent);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UETEquipmentSlot*, Slot);
 
 /**
@@ -30,7 +32,10 @@ public:
 	bool TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip, UETInventoryEntry*& RemainingItem);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsValidForItemType(const FETItemType& ItemType) const;
+	bool IsValidForItem(const UETInventoryEntry* Item) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsValidForItemType(const UETDAItemType* ItemType) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsEmpty() const { return InventoryEntry == nullptr; }
@@ -42,14 +47,14 @@ public:
 
 	FORCEINLINE UETInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
 
-	FORCEINLINE FName GetSlotName() const { return SlotName; }
+	FORCEINLINE FName GetSlotName() const { return Name; }
 
 	FORCEINLINE UInputAction* GetInputAction() const { return InputAction; }
 
 	FORCEINLINE bool IsActivatable() const { return bIsActivatable; }
 
 	UFUNCTION(BlueprintCallable)
-	FETEquipmentSlotType GetType() const;
+	UETDAEquipmentSlotType* GetType() const;
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool IsBlocked() const { return bIsBlocked; }
@@ -67,7 +72,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnIsBlockedChanged_EquipmentSlot OnIsBlockedChanged;
 
-#pragma endregion 
+#pragma endregion
 
 protected:
 
@@ -75,10 +80,10 @@ protected:
 	UETInventoryEntry* InventoryEntry;
 
 	UPROPERTY(EditDefaultsOnly)
-	FName SlotName;
+	FName Name;
 
-	UPROPERTY(EditDefaultsOnly, meta=(RequiredAssetDataTags="RowStructure=/Script/EterniaEquipmentInventory.ETEquipmentSlotType"))
-	FDataTableRowHandle SlotTypeRowHandle;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UETDAEquipmentSlotType> Type;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bIsActivatable;

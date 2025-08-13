@@ -10,7 +10,6 @@
 class UETTileInventoryComponent;
 class UEterniaItemDatabase;
 class UETInventoryEntry;
-class UETInventoryItemDefinition;
 
 USTRUCT(BlueprintType)
 struct FInventoryTile {

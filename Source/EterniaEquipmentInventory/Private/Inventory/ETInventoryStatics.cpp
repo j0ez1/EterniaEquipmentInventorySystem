@@ -3,43 +3,41 @@
 
 #include "Inventory/ETInventoryStatics.h"
 
-#include "ETEquipmentInventorySubsystem.h"
-#include "Helpers/ETLogging.h"
+#include "Data/ETDAItemDefinition.h"
 #include "Inventory/ETInventoryEntry.h"
-#include "Data/ETInventoryItemDefinition.h"
+#include "Util/ETEISStatics.h"
 
-UETInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UObject* WorldContextObject, UClass* ItemClass) {
-	UDataTable* ItemDataTable = GetItemDataTable(WorldContextObject);
-	if (ItemDataTable) {
-		TArray<FEtItemDefinition*> OutRowArray;
-		ItemDataTable->GetAllRows<FEtItemDefinition>("", OutRowArray);
-		for (FEtItemDefinition* Definition : OutRowArray) {
-			if (Definition && Definition->Representation == ItemClass) {
-				return UETInventoryItemDefinition::Convert(*Definition);
-			}
-		}
-	} else {
-		EEIS_ULOGS_ERROR(TEXT("Item DataTable is null"))
-	}
-	return nullptr;
-}
-
-UETInventoryItemDefinition* UETInventoryStatics::FindItemDefinitionByID(UObject* WorldContextObject, FName ItemID) {
-	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-	if (World) {
-		UGameInstance* GameInstance = World->GetGameInstance();
-		if (GameInstance) {
-			if (UETEquipmentInventorySubsystem* Subsystem = GameInstance->GetSubsystem<UETEquipmentInventorySubsystem>()) {
-				return Subsystem->FindItemDefinitionById(ItemID);
+UETDAItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UClass* ItemClass) {
+	TArray<UETDAItemDefinition*> ItemDefinitions;
+	UETEISStatics::GetObjectsOfClass<UETDAItemDefinition>(ItemDefinitions);
+	for (const FAssetData& Data : ItemDefinitions) {
+		if (UETDAItemDefinition* DataAsset = Cast<UETDAItemDefinition>(Data.GetAsset())) {
+			if (DataAsset->GetRepresentation() == ItemClass) {
+				return DataAsset;
 			}
 		}
 	}
+
 	return nullptr;
 }
 
-UETInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UETInventoryItemDefinition* Definition,
-                                                                    UETInventoryComponentBase* OwningInventoryComponent,
-                                                                    int32 Amount) {
+UETDAItemDefinition* UETInventoryStatics::FindItemDefinitionByID(FName ItemID) {
+	TArray<UETDAItemDefinition*> ItemDefinitions;
+	UETEISStatics::GetObjectsOfClass<UETDAItemDefinition>(ItemDefinitions);
+	for (const FAssetData& Data : ItemDefinitions) {
+		if (UETDAItemDefinition* DataAsset = Cast<UETDAItemDefinition>(Data.GetAsset())) {
+			if (DataAsset->GetItemID() == ItemID) {
+				return DataAsset;
+			}
+		}
+	}
+	
+	return nullptr;
+}
+
+UETInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UETDAItemDefinition* Definition,
+                                                               UETInventoryComponentBase* OwningInventoryComponent,
+                                                               int32 Amount) {
 	if (Definition) {
 		UETInventoryEntry* NewItem = NewObject<UETInventoryEntry>(OwningInventoryComponent);
 		NewItem->SetAmount(Amount);
@@ -48,9 +46,4 @@ UETInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UETInventoryItemD
 		return NewItem;
 	}
 	return nullptr;
-}
-
-UDataTable* UETInventoryStatics::GetItemDataTable(UObject* WorldContextObject) {
-	UETEquipmentInventorySubsystem* Subsystem = UETEquipmentInventorySubsystem::GetCurrent(WorldContextObject);
-	return Subsystem ? Subsystem->GetItemDatabase() : nullptr;
 }

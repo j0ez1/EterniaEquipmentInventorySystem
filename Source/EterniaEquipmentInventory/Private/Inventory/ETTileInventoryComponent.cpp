@@ -3,9 +3,9 @@
 
 #include "Inventory/ETTileInventoryComponent.h"
 
+#include "Data/ETDAItemDefinition.h"
 #include "Helpers/ETLogging.h"
 #include "Inventory/ETInventoryEntry.h"
-#include "Data/ETInventoryItemDefinition.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -28,7 +28,7 @@ bool UETTileInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
 		return false;
 	}
 
-	UETInventoryItemDefinition* Definition = ItemToAdd->GetDefinition();
+	UETDAItemDefinition* Definition = ItemToAdd->GetDefinition();
 	if (!Definition) {
 		EEIS_ULOG_ERROR(TEXT("Inventory entry definition is null"))
 		return false;

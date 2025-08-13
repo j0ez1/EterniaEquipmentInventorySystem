@@ -7,6 +7,7 @@
 #include "ETInventoryComponentBase.generated.h"
 
 
+class UETDAItemDefinition;
 class UETInventoryEntry;
 
 USTRUCT()
@@ -16,7 +17,7 @@ struct FInventoryItem {
 	FInventoryItem() = default;
 
 	UPROPERTY(EditAnywhere)
-	FDataTableRowHandle Definition = FDataTableRowHandle();
+	TSoftObjectPtr<UETDAItemDefinition> Definition;
 
 	UPROPERTY(EditAnywhere, meta=(UIMin=1, ClampMin=1))
 	int32 Amount = 1;
@@ -75,7 +76,5 @@ protected:
 	virtual void BeginPlay() override;
 
 	void InitInventory();
-
-	static UETInventoryEntry* CreateItemByDefinition(const FInventoryItem& ItemDef, UETInventoryComponentBase* OwningInventoryComponent);
 
 };

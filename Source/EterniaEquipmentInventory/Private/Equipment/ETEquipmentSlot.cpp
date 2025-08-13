@@ -3,6 +3,7 @@
 
 #include "Equipment/ETEquipmentSlot.h"
 
+#include "Data/ETDAItemDefinition.h"
 #include "Inventory/ETInventoryEntry.h"
 
 UETEquipmentSlot::UETEquipmentSlot(const FObjectInitializer& ObjectInitializer) :
@@ -37,12 +38,15 @@ bool UETEquipmentSlot::TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip
 	return false;
 }
 
-bool UETEquipmentSlot::IsValidForItemType(const FETItemType& ItemType) const {
-	FETEquipmentSlotType Type = GetType();
-	for (FETEquipmentSlotType ValidType : ItemType.GetValidEquipmentSlotTypes()) {
-		if (ValidType == Type) {
-			return true;
-		}
+bool UETEquipmentSlot::IsValidForItem(const UETInventoryEntry* Item) const {
+	UETDAItemDefinition* Definition = Item->GetDefinition();
+	UETDAItemType* ItemType = Definition->GetType();
+	return Definition && IsValidForItemType(ItemType);
+}
+
+bool UETEquipmentSlot::IsValidForItemType(const UETDAItemType* ItemType) const {
+	for (TSoftObjectPtr<UETDAEquipmentSlotType> ValidType : ItemType->GetValidEquipmentSlotTypes()) {
+		return ValidType.LoadSynchronous() == Type.LoadSynchronous();
 	}
 	return false;
 }
@@ -57,12 +61,8 @@ UETInventoryEntry* UETEquipmentSlot::Clear(bool bSilent) {
 	return OldItem;
 }
 
-FETEquipmentSlotType UETEquipmentSlot::GetType() const {
-	FETEquipmentSlotType* Row = SlotTypeRowHandle.GetRow<FETEquipmentSlotType>("");
-	if (Row) {
-		return *Row;
-	}
-	return FETEquipmentSlotType();
+UETDAEquipmentSlotType* UETEquipmentSlot::GetType() const {
+	return Type.LoadSynchronous();
 }
 
 void UETEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
@@ -78,7 +78,7 @@ void UETEquipmentSlot::SetIsBlocked(bool InbIsBlocked) {
 
 bool UETEquipmentSlot::DoSetItem(UETInventoryEntry* NewItem) {
 	if (NewItem && NewItem != InventoryEntry && NewItem->GetDefinition()) {
-		if (IsValidForItemType(NewItem->GetDefinition()->GetItemType())) {
+		if (IsValidForItemType(NewItem->GetDefinition()->GetType())) {
 			UETInventoryEntry* OldItem = InventoryEntry;
 			if (InventoryEntry) {
 				InventoryEntry->OnItemAmountChanged.RemoveDynamic(this, &UETEquipmentSlot::HandleItemAmountChanged);

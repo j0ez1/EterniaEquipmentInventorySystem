@@ -5,13 +5,12 @@
 #include "CoreMinimal.h"
 #include "ActiveGameplayEffectHandle.h"
 #include "ETInventoryComponentBase.h"
-#include "Data/ETInventoryItemDefinition.h"
+#include "Data/ETDAItemDefinition.h"
 #include "UObject/Object.h"
 #include "ETInventoryEntry.generated.h"
 
 class IAbilitySystemInterface;
 class UETInventoryEntry;
-class UETInventoryItemDefinition;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UETInventoryEntry*, UpdatedItem, int32, NewAmount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UETInventoryEntry*, Item);
@@ -27,14 +26,15 @@ public:
 
 	UETInventoryEntry(const FObjectInitializer& ObjectInitializer);
 
-	FORCEINLINE UETInventoryItemDefinition* GetDefinition() const { return Definition; }
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE UETDAItemDefinition* GetDefinition() const { return Definition; }
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetAmount() const { return Amount; }
 
 	void IncrementAmount(int32 AmountToAdd);
 
-	void SetDefinition(UETInventoryItemDefinition* Definition);
+	void SetDefinition(UETDAItemDefinition* Definition);
 
 	void SetAmount(int32 Am);
 
@@ -81,7 +81,7 @@ public:
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
-	UETInventoryItemDefinition* Definition;
+	UETDAItemDefinition* Definition;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Amount;

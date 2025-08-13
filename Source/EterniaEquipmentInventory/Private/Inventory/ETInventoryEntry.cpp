@@ -8,7 +8,6 @@
 #include "GameplayEffect.h"
 #include "Combination/ETCombinationBlueprintLibrary.h"
 #include "Inventory/ETTileInventoryComponent.h"
-#include "Data/ETInventoryItemDefinition.h"
 #include "Inventory/ETInventoryStatics.h"
 
 
@@ -22,7 +21,7 @@ void UETInventoryEntry::IncrementAmount(int32 AmountToAdd) {
 	Amount += AmountToAdd;
 }
 
-void UETInventoryEntry::SetDefinition(UETInventoryItemDefinition* Def) {
+void UETInventoryEntry::SetDefinition(UETDAItemDefinition* Def) {
 	Definition = Def;
 }
 
@@ -70,10 +69,10 @@ void UETInventoryEntry::SetOwningInventoryComponent(UETInventoryComponentBase* I
 }
 
 bool UETInventoryEntry::IsSameItem(UETInventoryEntry* Item) const {
-	if (!Item || !Item->GetDefinition() || !Definition) {
+	if (!Item || !Item->Definition || !Definition) {
 		return false;
 	}
-	return Item->GetDefinition()->GetItemID().IsEqual(Definition->GetItemID());
+	return Item->Definition->GetItemID().IsEqual(Definition->GetItemID());
 }
 
 bool UETInventoryEntry::IsStackFull() const {
@@ -107,7 +106,7 @@ void UETInventoryEntry::Activate(AActor* ActivatorActor) {
 		}
 		SetAmount(Amount - 1);
 		FName ConsumeReplaceItemID = Definition->GetConsumeReplaceItemID();
-		UETInventoryItemDefinition* ReplaceItemDef = UETInventoryStatics::FindItemDefinitionByID(this, ConsumeReplaceItemID);
+		UETDAItemDefinition* ReplaceItemDef = UETInventoryStatics::FindItemDefinitionByID(ConsumeReplaceItemID);
 		UETInventoryEntry* ItemToAdd = UETInventoryStatics::CreateItemByDefinition(ReplaceItemDef, OwningInventoryComponent);
 		OwningInventoryComponent->TryAddItem(ItemToAdd);
 	}
@@ -120,12 +119,12 @@ bool UETInventoryEntry::TryCombineWith(UETInventoryEntry* ItemToCombineWith) {
 		ItemToCombineWith->SetAmount(ItemToCombineWith->GetAmount() - 1);
 
 		// TODO Extract item creation code?
-		UETInventoryItemDefinition* ResultItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.ResultId);
+		UETDAItemDefinition* ResultItemDef = UETInventoryStatics::FindItemDefinitionByID(CombinationResult.ResultId);
 		UETInventoryEntry* ResultItem = UETInventoryStatics::CreateItemByDefinition(ResultItemDef, ItemToCombineWith->GetOwningInventoryComponent());
 		bool bTryAddItem = ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(ResultItem);
 
 		if (CombinationResult.RemainderId != NAME_None) {
-			UETInventoryItemDefinition* RemainderItemDef = UETInventoryStatics::FindItemDefinitionByID(this, CombinationResult.RemainderId);
+			UETDAItemDefinition* RemainderItemDef = UETInventoryStatics::FindItemDefinitionByID(CombinationResult.RemainderId);
 			UETInventoryEntry* RemainderItem = UETInventoryStatics::CreateItemByDefinition(RemainderItemDef, ItemToCombineWith->GetOwningInventoryComponent());
 			bTryAddItem = bTryAddItem && ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(RemainderItem);
 		}

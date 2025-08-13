@@ -3,14 +3,10 @@
 
 #include "Inventory/ETInventoryComponentBase.h"
 
-#include "Data/ETInventoryItemDefinition.h"
 #include "Inventory/ETInventoryEntry.h"
 #include "Inventory/ETInventoryStatics.h"
 #include "Net/UnrealNetwork.h"
 
-
-class UETInventoryItemDefinition;
-struct FEtItemDefinition;
 
 UETInventoryComponentBase::UETInventoryComponentBase(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer) {
@@ -38,20 +34,10 @@ void UETInventoryComponentBase::BeginPlay() {
 
 void UETInventoryComponentBase::InitInventory() {
 	for (FInventoryItem Item : StartItems) {
-		UETInventoryEntry* NewItem = CreateItemByDefinition(Item, this);
+		UETInventoryEntry* NewItem = UETInventoryStatics::CreateItemByDefinition(Item.Definition.LoadSynchronous(), this, Item.Amount);
 		TryAddItem(NewItem);
 	}
 
 	// Workaround for Inventory UI correct drawing
 	OnInventoryInitialized.Broadcast();
-}
-
-UETInventoryEntry* UETInventoryComponentBase::CreateItemByDefinition(const FInventoryItem& ItemDef,
-                                                                     UETInventoryComponentBase* OwningInventoryComponent) {
-	FEtItemDefinition* FoundItemDef = ItemDef.Definition.GetRow<FEtItemDefinition>("");
-	if (FoundItemDef) {
-		UETInventoryItemDefinition* Definition = UETInventoryItemDefinition::Convert(*FoundItemDef);
-		return UETInventoryStatics::CreateItemByDefinition(Definition, OwningInventoryComponent, ItemDef.Amount);
-	}
-	return nullptr;
 }

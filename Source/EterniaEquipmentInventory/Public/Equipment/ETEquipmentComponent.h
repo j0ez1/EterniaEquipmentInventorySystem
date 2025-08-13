@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "ETEquipmentSlot.h"
 #include "Components/ActorComponent.h"
-#include "Data/EquipmentTypes.h"
+#include "Data/ETDAItemType.h"
 #include "ETEquipmentComponent.generated.h"
 
-class UETInventoryItemDefinition;
+class UETDAEquipmentSlotType;
 class UETEquipmentSlot;
 class UETInventoryEntry;
 class UEterniaInventoryWeaponDefinition;
@@ -32,19 +32,21 @@ public:
 	UETEquipmentSlot* FindSlotByName(const FName& Name) const;
 
 	UFUNCTION(BlueprintCallable)
-	UETEquipmentSlot* FindSlotByType(const FETEquipmentSlotType& SlotType) const;
+	UETEquipmentSlot* FindSlotByType(const UETDAEquipmentSlotType* SlotType) const;
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UETEquipmentSlot*> FindAllValidSlotsForItemType(const FETItemType& ItemType) const;
+	TArray<UETEquipmentSlot*> FindAllValidSlotsForItemType(const UETDAItemType* ItemType) const;
 
 	UFUNCTION(BlueprintCallable)
 	UETEquipmentSlot* FindSlotByInputAction(const UInputAction* InputAction) const;
 
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Replicated)
 	TArray<TObjectPtr<UETEquipmentSlot>> Slots;
 
 	void UpdateSlotBlockState();
