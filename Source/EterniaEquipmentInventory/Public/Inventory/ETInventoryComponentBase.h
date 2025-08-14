@@ -66,7 +66,7 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Replicated)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, SaveGame, Replicated)
 	TArray<TObjectPtr<UETInventoryEntry>> Items;
 
 	// Items to be added to inventory on BeginPlay

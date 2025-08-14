@@ -84,13 +84,13 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, SaveGame)
 	TArray<TObjectPtr<UETInventoryEntry>> Inventory;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Rows;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Columns;
 
 	FInventoryTile IndexToTile(int32 Index) const;
