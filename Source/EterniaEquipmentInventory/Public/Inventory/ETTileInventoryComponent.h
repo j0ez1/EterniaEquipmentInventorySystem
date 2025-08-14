@@ -34,7 +34,7 @@ struct FInventoryTile {
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMoneyCountChangedSignature, float);
 
-UCLASS(ClassGroup=(Eternia), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Eternia), DisplayName="[Eternia] Tile Inventory Component", meta=(BlueprintSpawnableComponent))
 class ETERNIAEQUIPMENTINVENTORY_API UETTileInventoryComponent : public UETInventoryComponentBase {
 	GENERATED_BODY()
 
@@ -87,10 +87,10 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TArray<TObjectPtr<UETInventoryEntry>> Inventory;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Rows;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Columns;
 
 	FInventoryTile IndexToTile(int32 Index) const;

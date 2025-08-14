@@ -30,7 +30,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUpdatedDelegate, UETInventory
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, UETInventoryEntry*, Item);
 DECLARE_MULTICAST_DELEGATE(FOnInventoryInitialized);
 
-UCLASS(Abstract, ClassGroup=(Eternia), meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract, ClassGroup=(Eternia), DisplayName="[Eternia] Inventory Component Base", meta=(BlueprintSpawnableComponent))
 class ETERNIAEQUIPMENTINVENTORY_API UETInventoryComponentBase : public UActorComponent {
 	GENERATED_BODY()
 

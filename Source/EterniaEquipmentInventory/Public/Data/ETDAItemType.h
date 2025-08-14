@@ -10,7 +10,7 @@ class UETDAEquipmentSlotType;
 /**
  * 
  */
-UCLASS(DisplayName="[Eternia] Item Type")
+UCLASS(DisplayName="[Eternia] Item Type", BlueprintType)
 class ETERNIAEQUIPMENTINVENTORY_API UETDAItemType : public UDataAsset {
 	GENERATED_BODY()
 

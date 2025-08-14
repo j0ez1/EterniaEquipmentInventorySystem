@@ -13,7 +13,7 @@ class UETEquipmentSlot;
 class UETInventoryEntry;
 class UEterniaInventoryWeaponDefinition;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), DisplayName="[Eternia] Equipment Component", meta=(BlueprintSpawnableComponent))
 class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentComponent : public UActorComponent {
 	GENERATED_BODY()
 
