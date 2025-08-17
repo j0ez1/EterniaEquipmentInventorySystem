@@ -4,27 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "ActiveGameplayEffectHandle.h"
-#include "ETInventoryComponentBase.h"
 #include "Data/ETDAItemDefinition.h"
 #include "UObject/Object.h"
-#include "ETInventoryEntry.generated.h"
+#include "ETItem.generated.h"
 
+class UETInventoryComponentBase;
 class IAbilitySystemInterface;
-class UETInventoryEntry;
+class UETItem;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UETInventoryEntry*, UpdatedItem, int32, NewAmount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UETInventoryEntry*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemAmountChangedDelegate, UETItem*, UpdatedItem, int32, NewAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UETItem*, Item);
 
 /**
  * 
  */
 UCLASS(BlueprintType)
-class ETERNIAEQUIPMENTINVENTORY_API UETInventoryEntry : public UObject {
+class ETERNIAEQUIPMENTINVENTORY_API UETItem : public UObject {
 	GENERATED_BODY()
 
 public:
 
-	UETInventoryEntry(const FObjectInitializer& ObjectInitializer);
+	UETItem(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE UETDAItemDefinition* GetDefinition() const { return Definition; }
@@ -64,7 +64,7 @@ public:
 	FORCEINLINE bool IsStackable() const { return Definition && Definition->IsStackable(); }
 
 	UFUNCTION(BlueprintPure)
-	bool IsSameItem(UETInventoryEntry* Item) const;
+	bool IsSameItem(UETItem* Item) const;
 
 	UFUNCTION(BlueprintPure)
 	bool IsStackFull() const;
@@ -74,9 +74,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Activate(AActor* ActivatorActor);
-
-	UFUNCTION(BlueprintCallable)
-	bool TryCombineWith(UETInventoryEntry* ItemToCombineWith);
 
 protected:
 

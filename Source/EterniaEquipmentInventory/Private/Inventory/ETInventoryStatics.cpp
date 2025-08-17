@@ -35,11 +35,11 @@ UETDAItemDefinition* UETInventoryStatics::FindItemDefinitionByID(FName ItemID) {
 	return nullptr;
 }
 
-UETInventoryEntry* UETInventoryStatics::CreateItemByDefinition(UETDAItemDefinition* Definition,
+UETItem* UETInventoryStatics::CreateItemByDefinition(UETDAItemDefinition* Definition,
                                                                UETInventoryComponentBase* OwningInventoryComponent,
                                                                int32 Amount) {
 	if (Definition) {
-		UETInventoryEntry* NewItem = NewObject<UETInventoryEntry>(OwningInventoryComponent);
+		UETItem* NewItem = NewObject<UETItem>(OwningInventoryComponent);
 		NewItem->SetAmount(Amount);
 		NewItem->SetDefinition(Definition);
 		NewItem->SetOwningInventoryComponent(OwningInventoryComponent);

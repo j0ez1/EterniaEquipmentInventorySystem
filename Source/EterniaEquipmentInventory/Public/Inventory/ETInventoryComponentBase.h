@@ -8,7 +8,7 @@
 
 
 class UETDAItemDefinition;
-class UETInventoryEntry;
+class UETItem;
 
 USTRUCT()
 struct FInventoryItem {
@@ -25,9 +25,9 @@ struct FInventoryItem {
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UETInventoryEntry*, Item);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUpdatedDelegate, UETInventoryEntry*, Item);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, UETInventoryEntry*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UETItem*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUpdatedDelegate, UETItem*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, UETItem*, Item);
 DECLARE_MULTICAST_DELEGATE(FOnInventoryInitialized);
 
 UCLASS(Abstract, ClassGroup=(Eternia), DisplayName="[Eternia] Inventory Component Base", meta=(BlueprintSpawnableComponent))
@@ -39,13 +39,13 @@ public:
 	UETInventoryComponentBase(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	virtual bool TryAddItem(UETInventoryEntry* ItemToAdd) { return false; }
+	virtual bool TryAddItem(UETItem* ItemToAdd) { return false; }
 
 	UFUNCTION(BlueprintCallable)
-	virtual bool RemoveItem(UETInventoryEntry* EntryToRemove) { return false; }
+	virtual bool RemoveItem(UETItem* EntryToRemove) { return false; }
 
 	// Entry to remove must exist in inventory
-	void SwapItems(UETInventoryEntry* EntryToRemove, UETInventoryEntry* EntryToAdd);
+	void SwapItems(UETItem* EntryToRemove, UETItem* EntryToAdd);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnItemAddedDelegate OnItemAdded;
@@ -67,7 +67,7 @@ public:
 protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, SaveGame, Replicated)
-	TArray<TObjectPtr<UETInventoryEntry>> Items;
+	TArray<TObjectPtr<UETItem>> Items;
 
 	// Items to be added to inventory on BeginPlay
 	UPROPERTY(EditAnywhere)

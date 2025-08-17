@@ -8,7 +8,7 @@
 #include "ETInventoryStatics.generated.h"
 
 class UETDAItemDefinition;
-class UETInventoryEntry;
+class UETItem;
 /**
  * 
  */
@@ -25,7 +25,7 @@ public:
 	static UETDAItemDefinition* FindItemDefinitionByID(FName ItemID);
 
 	UFUNCTION(BlueprintCallable, Category="Eternia|Items")
-	static UETInventoryEntry* CreateItemByDefinition(UETDAItemDefinition* Definition, UETInventoryComponentBase* OwningInventoryComponent, int32 Amount = 1);
+	static UETItem* CreateItemByDefinition(UETDAItemDefinition* Definition, UETInventoryComponentBase* OwningInventoryComponent, int32 Amount = 1);
 
 private:
 

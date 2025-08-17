@@ -3,8 +3,8 @@
 
 #include "Inventory/ETInventoryComponentBase.h"
 
-#include "Inventory/ETInventoryEntry.h"
 #include "Inventory/ETInventoryStatics.h"
+#include "Items/ETItem.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -14,7 +14,7 @@ UETInventoryComponentBase::UETInventoryComponentBase(const FObjectInitializer& O
 	SetIsReplicatedByDefault(true);
 }
 
-void UETInventoryComponentBase::SwapItems(UETInventoryEntry* EntryToRemove, UETInventoryEntry* EntryToAdd) {
+void UETInventoryComponentBase::SwapItems(UETItem* EntryToRemove, UETItem* EntryToAdd) {
 	if (EntryToRemove && EntryToRemove->GetOwningInventoryComponent() && TryAddItem(EntryToAdd)) {
 		EntryToRemove->GetOwningInventoryComponent()->RemoveItem(EntryToRemove);
 	}
@@ -34,7 +34,7 @@ void UETInventoryComponentBase::BeginPlay() {
 
 void UETInventoryComponentBase::InitInventory() {
 	for (FInventoryItem Item : StartItems) {
-		UETInventoryEntry* NewItem = UETInventoryStatics::CreateItemByDefinition(Item.Definition.LoadSynchronous(), this, Item.Amount);
+		UETItem* NewItem = UETInventoryStatics::CreateItemByDefinition(Item.Definition.LoadSynchronous(), this, Item.Amount);
 		TryAddItem(NewItem);
 	}
 

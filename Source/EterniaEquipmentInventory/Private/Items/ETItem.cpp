@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Inventory/ETInventoryEntry.h"
+#include "Items/ETItem.h"
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
@@ -11,40 +11,40 @@
 #include "Inventory/ETInventoryStatics.h"
 
 
-UETInventoryEntry::UETInventoryEntry(const FObjectInitializer& ObjectInitializer)
+UETItem::UETItem(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, Amount(0)
 	, Rotated(false) {
 }
 
-void UETInventoryEntry::IncrementAmount(int32 AmountToAdd) {
+void UETItem::IncrementAmount(int32 AmountToAdd) {
 	Amount += AmountToAdd;
 }
 
-void UETInventoryEntry::SetDefinition(UETDAItemDefinition* Def) {
+void UETItem::SetDefinition(UETDAItemDefinition* Def) {
 	Definition = Def;
 }
 
-void UETInventoryEntry::SetAmount(int32 Am) {
+void UETItem::SetAmount(int32 Am) {
 	Amount = IsStackable() ? FMath::Clamp(Am, 0, Definition->GetStackSize()) : 1;
 	OnItemAmountChanged.Broadcast(this, Amount);
 }
 
-FIntPoint UETInventoryEntry::GetDimensions() {
+FIntPoint UETItem::GetDimensions() {
 	FIntPoint Dimensions = Definition->GetDimensions();
 	return Rotated ? FIntPoint(Dimensions.Y, Dimensions.X) : Dimensions;
 }
 
-UMaterialInterface* UETInventoryEntry::GetImage() {
+UMaterialInterface* UETItem::GetImage() {
 	return Rotated ? Definition->GetImageRotated() : Definition->GetImage();
 }
 
-void UETInventoryEntry::Rotate() {
+void UETItem::Rotate() {
 	Rotated = !Rotated;
 	OnItemRotated.Broadcast(this);
 }
 
-void UETInventoryEntry::SetOwningInventoryComponent(UETInventoryComponentBase* InInventoryComponent) {
+void UETItem::SetOwningInventoryComponent(UETInventoryComponentBase* InInventoryComponent) {
 	if (OwningInventoryComponent == InInventoryComponent) return;
 
 	UAbilitySystemComponent* ASC = FindAbilitySystemComponent(OwningInventoryComponent);
@@ -68,14 +68,14 @@ void UETInventoryEntry::SetOwningInventoryComponent(UETInventoryComponentBase* I
 	}
 }
 
-bool UETInventoryEntry::IsSameItem(UETInventoryEntry* Item) const {
+bool UETItem::IsSameItem(UETItem* Item) const {
 	if (!Item || !Item->Definition || !Definition) {
 		return false;
 	}
 	return Item->Definition->GetItemID().IsEqual(Definition->GetItemID());
 }
 
-bool UETInventoryEntry::IsStackFull() const {
+bool UETItem::IsStackFull() const {
 	if (!Definition) {
 		return true;
 	}
@@ -85,7 +85,7 @@ bool UETInventoryEntry::IsStackFull() const {
 	return GetAmount() >= Definition->GetStackSize();
 }
 
-int32 UETInventoryEntry::GetStackLimit() const {
+int32 UETItem::GetStackLimit() const {
 	if (!Definition) {
 		return 0;
 	}
@@ -95,7 +95,7 @@ int32 UETInventoryEntry::GetStackLimit() const {
 	return FMath::Max(0, Definition->GetStackSize() - GetAmount());
 }
 
-void UETInventoryEntry::Activate(AActor* ActivatorActor) {
+void UETItem::Activate(AActor* ActivatorActor) {
 	if (OwningInventoryComponent && Definition && Definition->IsConsumable()) {
 		TSubclassOf<UGameplayEffect> EffectClass = Definition->GetConsumeEffect();
 		if (ActivatorActor && ActivatorActor->Implements<UAbilitySystemInterface>() && EffectClass) {
@@ -107,34 +107,12 @@ void UETInventoryEntry::Activate(AActor* ActivatorActor) {
 		SetAmount(Amount - 1);
 		FName ConsumeReplaceItemID = Definition->GetConsumeReplaceItemID();
 		UETDAItemDefinition* ReplaceItemDef = UETInventoryStatics::FindItemDefinitionByID(ConsumeReplaceItemID);
-		UETInventoryEntry* ItemToAdd = UETInventoryStatics::CreateItemByDefinition(ReplaceItemDef, OwningInventoryComponent);
+		UETItem* ItemToAdd = UETInventoryStatics::CreateItemByDefinition(ReplaceItemDef, OwningInventoryComponent);
 		OwningInventoryComponent->TryAddItem(ItemToAdd);
 	}
 }
 
-bool UETInventoryEntry::TryCombineWith(UETInventoryEntry* ItemToCombineWith) {
-	FCombinationResult CombinationResult;
-	if (UETCombinationBlueprintLibrary::CanCombineItems(this, this, ItemToCombineWith, CombinationResult)) {
-		SetAmount(GetAmount() - 1);
-		ItemToCombineWith->SetAmount(ItemToCombineWith->GetAmount() - 1);
-
-		// TODO Extract item creation code?
-		UETDAItemDefinition* ResultItemDef = UETInventoryStatics::FindItemDefinitionByID(CombinationResult.ResultId);
-		UETInventoryEntry* ResultItem = UETInventoryStatics::CreateItemByDefinition(ResultItemDef, ItemToCombineWith->GetOwningInventoryComponent());
-		bool bTryAddItem = ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(ResultItem);
-
-		if (CombinationResult.RemainderId != NAME_None) {
-			UETDAItemDefinition* RemainderItemDef = UETInventoryStatics::FindItemDefinitionByID(CombinationResult.RemainderId);
-			UETInventoryEntry* RemainderItem = UETInventoryStatics::CreateItemByDefinition(RemainderItemDef, ItemToCombineWith->GetOwningInventoryComponent());
-			bTryAddItem = bTryAddItem && ItemToCombineWith->GetOwningInventoryComponent()->TryAddItem(RemainderItem);
-		}
-
-		return bTryAddItem;
-	}
-	return false;
-}
-
-UAbilitySystemComponent* UETInventoryEntry::FindAbilitySystemComponent(UETInventoryComponentBase* InventoryComponent) {
+UAbilitySystemComponent* UETItem::FindAbilitySystemComponent(UETInventoryComponentBase* InventoryComponent) {
 	if (InventoryComponent) {
 		AActor* Owner = InventoryComponent->GetOwner();
 		if (Owner && Owner->Implements<UAbilitySystemInterface>()) {

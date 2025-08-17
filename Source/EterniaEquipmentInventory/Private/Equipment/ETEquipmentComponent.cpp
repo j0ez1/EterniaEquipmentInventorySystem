@@ -4,9 +4,8 @@
 #include "Equipment/ETEquipmentComponent.h"
 
 #include "Data/ETDAEquipmentSlotType.h"
-#include "Data/ETDAItemDefinition.h"
 #include "Equipment/ETEquipmentSlot.h"
-#include "Inventory/ETInventoryEntry.h"
+#include "Items/ETItem.h"
 #include "Net/UnrealNetwork.h"
 
 UETEquipmentComponent::UETEquipmentComponent(const FObjectInitializer& ObjectInitializer) :
@@ -15,14 +14,14 @@ UETEquipmentComponent::UETEquipmentComponent(const FObjectInitializer& ObjectIni
 	SetIsReplicatedByDefault(true);
 }
 
-bool UETEquipmentComponent::TryEquipItem(UETInventoryEntry* InventoryEntry, bool bForceEquip, UETInventoryEntry*& RemainingItem) {
-	if (InventoryEntry && InventoryEntry->GetDefinition()) {
-		TArray<UETEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(InventoryEntry->GetDefinition()->GetType());
+bool UETEquipmentComponent::TryEquipItem(UETItem* Item, bool bForceEquip, UETItem*& RemainingItem) {
+	if (Item && Item->GetDefinition()) {
+		TArray<UETEquipmentSlot*> FoundSlots = FindAllValidSlotsForItemType(Item->GetDefinition()->GetType());
 
 		// Try empty slots first regardless of bForceEquip ...
 		for (UETEquipmentSlot* Slot : FoundSlots) {
 			if (Slot->IsEmpty()) {
-				if (Slot->TryEquipItem(InventoryEntry, bForceEquip, RemainingItem)) {
+				if (Slot->TryEquipItem(Item, bForceEquip, RemainingItem)) {
 					return true;
 				}
 			}
@@ -31,7 +30,7 @@ bool UETEquipmentComponent::TryEquipItem(UETInventoryEntry* InventoryEntry, bool
 		// ... then try occupied slots
 		for (UETEquipmentSlot* Slot : FoundSlots) {
 			if (!Slot->IsEmpty()) {
-				if (Slot->TryEquipItem(InventoryEntry, bForceEquip, RemainingItem)) {
+				if (Slot->TryEquipItem(Item, bForceEquip, RemainingItem)) {
 					return true;
 				}
 			}
@@ -96,7 +95,7 @@ void UETEquipmentComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 void UETEquipmentComponent::UpdateSlotBlockState() {
 	TMap<FGuid, int32> BlockedSlotTypesMap;
 	for (UETEquipmentSlot* Slot : Slots) {
-		UETInventoryEntry* OccupyingItem = Slot->GetInventoryEntry();
+		UETItem* OccupyingItem = Slot->GetInventoryEntry();
 		if (OccupyingItem && OccupyingItem->GetDefinition() && OccupyingItem->GetDefinition()->GetType()) {
 			TArray<TSoftObjectPtr<UETDAEquipmentSlotType>> SlotTypesToBlock = OccupyingItem->GetDefinition()->GetType()->GetBlocksEquipmentSlotTypes();
 			for (const TSoftObjectPtr<UETDAEquipmentSlotType> SlotType : SlotTypesToBlock) {
@@ -140,6 +139,6 @@ void UETEquipmentComponent::UpdateSlotBlockState() {
 	}
 }
 
-void UETEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UETEquipmentSlot* Slot, UETInventoryEntry* OldItem, bool bSilent) {
+void UETEquipmentComponent::OnEquippedItemChanged_EquipmentSlot(UETEquipmentSlot* Slot, UETItem* OldItem, bool bSilent) {
 	UpdateSlotBlockState();
 }

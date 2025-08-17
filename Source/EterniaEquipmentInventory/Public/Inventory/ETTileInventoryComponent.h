@@ -9,7 +9,7 @@
 
 class UETTileInventoryComponent;
 class UEterniaItemDatabase;
-class UETInventoryEntry;
+class UETItem;
 
 USTRUCT(BlueprintType)
 struct FInventoryTile {
@@ -42,21 +42,21 @@ public:
 
 	UETTileInventoryComponent(const FObjectInitializer& ObjectInitializer);
 
-	bool TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile);
+	bool TryAddItemAt(UETItem* ItemToAdd, const FInventoryTile& TopLeftTile);
 
 	UFUNCTION(BlueprintCallable)
-	TMap<UETInventoryEntry*, FInventoryTile> GetAllItems() const;
+	TMap<UETItem*, FInventoryTile> GetAllItems() const;
 
-	bool GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const;
+	bool GetItemTopLeftTile(UETItem* Item, FInventoryTile& Tile) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const;
+	bool IsRoomAvailable(UETItem* ItemToCheck, int32 TopLeftIndex) const;
 
-	bool IsRoomAvailable(UETInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const;
+	bool IsRoomAvailable(UETItem* ItemToCheck, const FInventoryTile& TopLeftTile) const;
 
-	bool GetItemAtIndex(int32 Index, UETInventoryEntry*& Item) const;
+	bool GetItemAtIndex(int32 Index, UETItem*& Item) const;
 
-	bool GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const;
+	bool GetItemAtTile(const FInventoryTile& Tile, UETItem*& Item) const;
 
 	FOnMoneyCountChangedSignature OnMoneyChanged;
 
@@ -70,9 +70,9 @@ public:
 
 #pragma region UETInventoryComponentBase
 
-	virtual bool TryAddItem(UETInventoryEntry* ItemToAdd) override;
+	virtual bool TryAddItem(UETItem* ItemToAdd) override;
 
-	virtual bool RemoveItem(UETInventoryEntry* EntryToRemove) override;
+	virtual bool RemoveItem(UETItem* EntryToRemove) override;
 
 #pragma endregion
 
@@ -85,7 +85,7 @@ public:
 protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, SaveGame)
-	TArray<TObjectPtr<UETInventoryEntry>> Inventory;
+	TArray<TObjectPtr<UETItem>> Inventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame, Category="Size", meta=(UIMin=1, ClampMin=1, UIMax=255, ClampMax=255))
 	int32 Rows;
@@ -100,12 +100,12 @@ protected:
 
 	bool IsTileValid(const FInventoryTile& Tile) const;
 
-	void AddItemAt(UETInventoryEntry* Item, int32 TopLeftIndex);
+	void AddItemAt(UETItem* Item, int32 TopLeftIndex);
 
 	UFUNCTION()
-	void OnItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount);
+	void OnItemAmountChanged(UETItem* UpdatedItem, int32 NewAmount);
 
-	void AddItemAt(UETInventoryEntry* Item, const FInventoryTile& TopLeftTile);
+	void AddItemAt(UETItem* Item, const FInventoryTile& TopLeftTile);
 
 #pragma region UActorComponent
 

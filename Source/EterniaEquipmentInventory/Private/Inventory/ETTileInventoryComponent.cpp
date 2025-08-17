@@ -22,7 +22,7 @@ void UETTileInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
 	Inventory.Empty();
 }
 
-bool UETTileInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
+bool UETTileInventoryComponent::TryAddItem(UETItem* ItemToAdd) {
 	if (!ItemToAdd) {
 		EEIS_ULOG_ERROR(TEXT("Inventory entry to add is null"))
 		return false;
@@ -40,7 +40,7 @@ bool UETTileInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
 
 	// Find existing stackable item
 	if (ItemToAdd->IsStackable()) {
-		for (const TObjectPtr<UETInventoryEntry>& ExistingItem : Items) {
+		for (const TObjectPtr<UETItem>& ExistingItem : Items) {
 			if (ExistingItem && ExistingItem->IsSameItem(ItemToAdd)) {
 				if (ExistingItem->GetAmount() < Definition->GetStackSize()) {
 					ExistingItem->IncrementAmount(ItemToAdd->GetAmount());
@@ -67,12 +67,12 @@ bool UETTileInventoryComponent::TryAddItem(UETInventoryEntry* ItemToAdd) {
 	return false;
 }
 
-bool UETTileInventoryComponent::TryAddItemAt(UETInventoryEntry* ItemToAdd, const FInventoryTile& TopLeftTile) {
+bool UETTileInventoryComponent::TryAddItemAt(UETItem* ItemToAdd, const FInventoryTile& TopLeftTile) {
 	if (!ItemToAdd) return false;
 
 	bool bResult = false;
 	if (IsRoomAvailable(ItemToAdd, TopLeftTile)) {
-		UETInventoryEntry* ItemAtTile;
+		UETItem* ItemAtTile;
 		if (GetItemAtTile(TopLeftTile, ItemAtTile) && ItemAtTile) {
 			if (ItemAtTile != ItemToAdd) {
 				// Merging with the same item
@@ -109,11 +109,11 @@ bool UETTileInventoryComponent::TryAddItemAt(UETInventoryEntry* ItemToAdd, const
 	return bResult;
 }
 
-bool UETTileInventoryComponent::RemoveItem(UETInventoryEntry* EntryToRemove) {
+bool UETTileInventoryComponent::RemoveItem(UETItem* EntryToRemove) {
 	bool bItemRemoved = false;
 	if (EntryToRemove) {
 		for (int i = 0; i < Inventory.Num(); ++i) {
-			TObjectPtr<UETInventoryEntry> ExistingEntry = Inventory[i];
+			TObjectPtr<UETItem> ExistingEntry = Inventory[i];
 			if (ExistingEntry == EntryToRemove) {
 				ExistingEntry->OnItemAmountChanged.RemoveDynamic(this, &UETTileInventoryComponent::OnItemAmountChanged);
 				Inventory[i] = nullptr;
@@ -128,10 +128,10 @@ bool UETTileInventoryComponent::RemoveItem(UETInventoryEntry* EntryToRemove) {
 	return bItemRemoved;
 }
 
-TMap<UETInventoryEntry*, FInventoryTile> UETTileInventoryComponent::GetAllItems() const {
-	TMap<UETInventoryEntry*, FInventoryTile> AllItems;
+TMap<UETItem*, FInventoryTile> UETTileInventoryComponent::GetAllItems() const {
+	TMap<UETItem*, FInventoryTile> AllItems;
 	for (int i = 0; i < Inventory.Num(); ++i) {
-		UETInventoryEntry* Item = Inventory[i];
+		UETItem* Item = Inventory[i];
 		if (Item && !AllItems.Contains(Item)) {
 			AllItems.Add(Item, IndexToTile(i));
 		}
@@ -139,7 +139,7 @@ TMap<UETInventoryEntry*, FInventoryTile> UETTileInventoryComponent::GetAllItems(
 	return AllItems;
 }
 
-bool UETTileInventoryComponent::GetItemTopLeftTile(UETInventoryEntry* Item, FInventoryTile& Tile) const {
+bool UETTileInventoryComponent::GetItemTopLeftTile(UETItem* Item, FInventoryTile& Tile) const {
 	for (int i = 0; i < Rows; ++i) {
 		for (int j = 0; j < Columns; ++j) {
 			if (Inventory[i * Columns + j] == Item) {
@@ -157,11 +157,11 @@ void UETTileInventoryComponent::BeginPlay() {
 	Super::BeginPlay();
 }
 
-bool UETTileInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, int32 TopLeftIndex) const {
+bool UETTileInventoryComponent::IsRoomAvailable(UETItem* ItemToCheck, int32 TopLeftIndex) const {
 	return IsRoomAvailable(ItemToCheck, IndexToTile(TopLeftIndex));
 }
 
-bool UETTileInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, const FInventoryTile& TopLeftTile) const {
+bool UETTileInventoryComponent::IsRoomAvailable(UETItem* ItemToCheck, const FInventoryTile& TopLeftTile) const {
 	if (!ItemToCheck) {
 		return false;
 	}
@@ -172,7 +172,7 @@ bool UETTileInventoryComponent::IsRoomAvailable(UETInventoryEntry* ItemToCheck, 
 		for (int32 Y = TopLeftTile.Y; Y < TopLeftTile.Y + TilesY; Y++) {
 			FInventoryTile CurrentTile(X, Y);
 			if (IsTileValid(CurrentTile)) {
-				UETInventoryEntry* ItemAtTile;
+				UETItem* ItemAtTile;
 				if (GetItemAtIndex(TileToIndex(CurrentTile), ItemAtTile)) {
 					if (ItemAtTile) {
 						bool bIsSameStackableItemWithAvailSpace = ItemAtTile->IsSameItem(ItemToCheck) && !ItemAtTile->IsStackFull();
@@ -203,7 +203,7 @@ bool UETTileInventoryComponent::IsTileValid(const FInventoryTile& Tile) const {
 	return Tile.X >= 0 && Tile.Y >= 0 && Tile.X < Columns && Tile.Y < Rows;
 }
 
-bool UETTileInventoryComponent::GetItemAtIndex(int32 Index, UETInventoryEntry*& Item) const {
+bool UETTileInventoryComponent::GetItemAtIndex(int32 Index, UETItem*& Item) const {
 	if (Inventory.IsValidIndex(Index)) {
 		Item = Inventory[Index].Get();
 		return true;
@@ -211,21 +211,21 @@ bool UETTileInventoryComponent::GetItemAtIndex(int32 Index, UETInventoryEntry*& 
 	return false;
 }
 
-bool UETTileInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UETInventoryEntry*& Item) const {
+bool UETTileInventoryComponent::GetItemAtTile(const FInventoryTile& Tile, UETItem*& Item) const {
 	return GetItemAtIndex(TileToIndex(Tile), Item);
 }
 
-void UETTileInventoryComponent::AddItemAt(UETInventoryEntry* Item, int32 TopLeftIndex) {
+void UETTileInventoryComponent::AddItemAt(UETItem* Item, int32 TopLeftIndex) {
 	AddItemAt(Item, IndexToTile(TopLeftIndex));
 }
 
-void UETTileInventoryComponent::OnItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount) {
+void UETTileInventoryComponent::OnItemAmountChanged(UETItem* UpdatedItem, int32 NewAmount) {
 	if (NewAmount <= 0) {
 		RemoveItem(UpdatedItem);
 	}
 }
 
-void UETTileInventoryComponent::AddItemAt(UETInventoryEntry* Item, const FInventoryTile& TopLeftTile) {
+void UETTileInventoryComponent::AddItemAt(UETItem* Item, const FInventoryTile& TopLeftTile) {
 	if (Item) {
 		Items.Add(Item);
 		Item->SetOwningInventoryComponent(this);

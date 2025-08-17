@@ -10,10 +10,10 @@
 class UETDAEquipmentSlotType;
 class IAbilitySystemInterface;
 class UInputAction;
-class UETInventoryEntry;
+class UETItem;
 
 // FIXME bSilent usage is an ugly approach but it is needed for dependent code. Find a way to get rid of it
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged_EquipmentSlot, UETEquipmentSlot*, Slot, UETInventoryEntry*, OldItem, bool, bSilent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEquippedItemChanged_EquipmentSlot, UETEquipmentSlot*, Slot, UETItem*, OldItem, bool, bSilent);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, UETEquipmentSlot*, Slot);
 
@@ -29,23 +29,23 @@ public:
 	UETEquipmentSlot(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	bool TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip, UETInventoryEntry*& RemainingItem);
+	bool TryEquipItem(UETItem* NewItem, bool bForceEquip, UETItem*& RemainingItem);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsValidForItem(const UETInventoryEntry* Item) const;
+	bool IsValidForItem(const UETItem* Item) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsValidForItemType(const UETDAItemType* ItemType) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool IsEmpty() const { return InventoryEntry == nullptr; }
+	bool IsEmpty() const { return Item == nullptr; }
 
 	UFUNCTION(BlueprintCallable)
-	UETInventoryEntry* Clear(bool bSilent = false);
+	UETItem* Clear(bool bSilent = false);
 
 #pragma region GettersSetters
 
-	FORCEINLINE UETInventoryEntry* GetInventoryEntry() const { return InventoryEntry; }
+	FORCEINLINE UETItem* GetInventoryEntry() const { return Item; }
 
 	FORCEINLINE FName GetSlotName() const { return Name; }
 
@@ -77,7 +77,7 @@ public:
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
-	UETInventoryEntry* InventoryEntry;
+	UETItem* Item;
 
 	UPROPERTY(EditDefaultsOnly)
 	FName Name;
@@ -94,8 +94,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bIsActivatable"))
 	UInputAction* InputAction;
 
-	bool DoSetItem(UETInventoryEntry* NewItem);
+	bool DoSetItem(UETItem* NewItem);
 
 	UFUNCTION()
-	void HandleItemAmountChanged(UETInventoryEntry* UpdatedItem, int32 NewAmount);
+	void HandleItemAmountChanged(UETItem* UpdatedItem, int32 NewAmount);
 };

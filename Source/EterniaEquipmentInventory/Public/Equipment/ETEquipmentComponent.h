@@ -10,7 +10,7 @@
 
 class UETDAEquipmentSlotType;
 class UETEquipmentSlot;
-class UETInventoryEntry;
+class UETItem;
 class UEterniaInventoryWeaponDefinition;
 
 UCLASS(ClassGroup=(Custom), DisplayName="[Eternia] Equipment Component", meta=(BlueprintSpawnableComponent))
@@ -24,7 +24,7 @@ public:
 	/*
 	 * Try to equip item to first valid empty slot or if bForceEquip == true then try to replace an item in first valid occupied slot  
 	 */
-	bool TryEquipItem(UETInventoryEntry* InventoryEntry, bool bForceEquip, UETInventoryEntry*& RemainingItem);
+	bool TryEquipItem(UETItem* Item, bool bForceEquip, UETItem*& RemainingItem);
 
 	FORCEINLINE TArray<TObjectPtr<UETEquipmentSlot>> GetSlots() const { return Slots; }
 
@@ -52,5 +52,5 @@ protected:
 	void UpdateSlotBlockState();
 
 	UFUNCTION()
-	void OnEquippedItemChanged_EquipmentSlot(UETEquipmentSlot* Slot, UETInventoryEntry* OldItem, bool bSilent);
+	void OnEquippedItemChanged_EquipmentSlot(UETEquipmentSlot* Slot, UETItem* OldItem, bool bSilent);
 };
