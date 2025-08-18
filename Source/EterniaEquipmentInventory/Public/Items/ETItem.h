@@ -19,7 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRotated_InventoryEntry, UETIt
  * 
  */
 UCLASS(BlueprintType)
-class ETERNIAEQUIPMENTINVENTORY_API UETItem : public UObject {
+class ETERNIAITEMS_API UETItem : public UObject {
 	GENERATED_BODY()
 
 public:

@@ -15,7 +15,7 @@ class UETCombineableInterface : public UInterface {
 /**
  * 
  */
-class ETERNIAEQUIPMENTINVENTORY_API IETCombineableInterface {
+class ETERNIAITEMS_API IETCombineableInterface {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.

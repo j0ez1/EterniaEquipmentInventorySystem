@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentInventorySubsystem : public UGameInstanceSubsystem {
+class ETERNIAITEMS_API UETEquipmentInventorySubsystem : public UGameInstanceSubsystem {
 	GENERATED_BODY()
 
 public:

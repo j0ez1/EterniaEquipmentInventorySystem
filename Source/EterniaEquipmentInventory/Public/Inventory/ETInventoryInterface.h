@@ -9,14 +9,14 @@
 class UETInventoryComponentBase;
 // This class does not need to be modified.
 UINTERFACE()
-class ETERNIAEQUIPMENTINVENTORY_API UInventoryInterface : public UInterface {
+class ETERNIAITEMS_API UInventoryInterface : public UInterface {
 	GENERATED_BODY()
 };
 
 /**
  * 
  */
-class ETERNIAEQUIPMENTINVENTORY_API IInventoryInterface {
+class ETERNIAITEMS_API IInventoryInterface {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.

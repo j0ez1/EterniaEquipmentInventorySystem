@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class ETERNIAEQUIPMENTINVENTORY_API UETEISStatics : public UBlueprintFunctionLibrary {
+class ETERNIAITEMS_API UETEISStatics : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
 public:

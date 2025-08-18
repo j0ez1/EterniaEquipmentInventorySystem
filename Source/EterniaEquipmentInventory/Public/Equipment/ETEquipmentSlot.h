@@ -21,7 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBlockedChanged_EquipmentSlot, U
  * 
  */
 UCLASS(BlueprintType, EditInlineNew)
-class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentSlot : public UObject {
+class ETERNIAITEMS_API UETEquipmentSlot : public UObject {
 	GENERATED_BODY()
 
 public:

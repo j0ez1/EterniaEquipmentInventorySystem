@@ -10,7 +10,7 @@
  * 
  */
 UCLASS(Config = EterniaSettings, DefaultConfig, DisplayName="Eternia Equipment & Inventory System", meta=(ScriptName="EquipmentInventorySettings"))
-class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentInventorySettings : public UDeveloperSettings {
+class ETERNIAITEMS_API UETEquipmentInventorySettings : public UDeveloperSettings {
 	GENERATED_BODY()
 
 public:

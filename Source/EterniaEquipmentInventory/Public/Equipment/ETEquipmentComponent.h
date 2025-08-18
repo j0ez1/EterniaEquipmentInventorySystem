@@ -14,7 +14,7 @@ class UETItem;
 class UEterniaInventoryWeaponDefinition;
 
 UCLASS(ClassGroup=(Custom), DisplayName="[Eternia] Equipment Component", meta=(BlueprintSpawnableComponent))
-class ETERNIAEQUIPMENTINVENTORY_API UETEquipmentComponent : public UActorComponent {
+class ETERNIAITEMS_API UETEquipmentComponent : public UActorComponent {
 	GENERATED_BODY()
 
 public:

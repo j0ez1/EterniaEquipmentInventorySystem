@@ -35,7 +35,7 @@ struct FInventoryTile {
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMoneyCountChangedSignature, float);
 
 UCLASS(ClassGroup=(Eternia), DisplayName="[Eternia] Tile Inventory Component", meta=(BlueprintSpawnableComponent))
-class ETERNIAEQUIPMENTINVENTORY_API UETTileInventoryComponent : public UETInventoryComponentBase {
+class ETERNIAITEMS_API UETTileInventoryComponent : public UETInventoryComponentBase {
 	GENERATED_BODY()
 
 public:

@@ -30,7 +30,7 @@ struct FItemCombinationTableRow : public FTableRowBase {
 };
 
 UCLASS(NotBlueprintable)
-class ETERNIAEQUIPMENTINVENTORY_API UETCombinationBlueprintLibrary : public UBlueprintFunctionLibrary {
+class ETERNIAITEMS_API UETCombinationBlueprintLibrary : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
 public:

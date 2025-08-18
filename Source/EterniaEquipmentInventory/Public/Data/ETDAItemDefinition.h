@@ -12,7 +12,7 @@ class UGameplayEffect;
  * 
  */
 UCLASS(DisplayName="[Eternia] Item Definition", BlueprintType)
-class ETERNIAEQUIPMENTINVENTORY_API UETDAItemDefinition : public UDataAsset {
+class ETERNIAITEMS_API UETDAItemDefinition : public UDataAsset {
 	GENERATED_BODY()
 
 public:

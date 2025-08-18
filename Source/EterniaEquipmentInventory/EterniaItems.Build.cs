@@ -1,8 +1,8 @@
 ﻿using UnrealBuildTool;
 
-public class EterniaEquipmentInventory : ModuleRules
+public class EterniaItems : ModuleRules
 {
-    public EterniaEquipmentInventory(ReadOnlyTargetRules Target) : base(Target)
+    public EterniaItems(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -10,7 +10,8 @@ public class EterniaEquipmentInventory : ModuleRules
             new string[]
             {
                 "Core",
-                "EnhancedInput", "GameplayAbilities"
+                "EnhancedInput", 
+                "GameplayAbilities"
             }
         );
 

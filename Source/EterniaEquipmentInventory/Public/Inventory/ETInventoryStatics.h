@@ -13,7 +13,7 @@ class UETItem;
  * 
  */
 UCLASS()
-class ETERNIAEQUIPMENTINVENTORY_API UETInventoryStatics : public UBlueprintFunctionLibrary {
+class ETERNIAITEMS_API UETInventoryStatics : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
 public:
