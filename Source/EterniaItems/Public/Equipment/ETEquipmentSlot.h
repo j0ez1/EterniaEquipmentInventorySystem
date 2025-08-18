@@ -32,7 +32,7 @@ public:
 	bool TryEquipItem(UETItem* NewItem, bool bForceEquip, UETItem*& RemainingItem);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsValidForItem(const UETItem* Item) const;
+	bool IsValidForItem(const UETItem* InItem) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsValidForItemType(const UETDAItemType* ItemType) const;

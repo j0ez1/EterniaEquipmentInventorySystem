@@ -5,7 +5,7 @@
 
 #include "Data/ETDAItemDefinition.h"
 #include "Helpers/ETLogging.h"
-#include "Inventory/ETInventoryEntry.h"
+#include "Items/ETItem.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 

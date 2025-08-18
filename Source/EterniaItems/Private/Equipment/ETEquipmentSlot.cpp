@@ -38,8 +38,8 @@ bool UETEquipmentSlot::TryEquipItem(UETItem* NewItem, bool bForceEquip, UETItem*
 	return false;
 }
 
-bool UETEquipmentSlot::IsValidForItem(const UETItem* Item) const {
-	UETDAItemDefinition* Definition = Item->GetDefinition();
+bool UETEquipmentSlot::IsValidForItem(const UETItem* InItem) const {
+	UETDAItemDefinition* Definition = InItem->GetDefinition();
 	UETDAItemType* ItemType = Definition->GetType();
 	return Definition && IsValidForItemType(ItemType);
 }

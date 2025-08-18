@@ -4,7 +4,7 @@
 #include "Inventory/ETInventoryStatics.h"
 
 #include "Data/ETDAItemDefinition.h"
-#include "Inventory/ETInventoryEntry.h"
+#include "Items/ETItem.h"
 #include "Util/ETEISStatics.h"
 
 UETDAItemDefinition* UETInventoryStatics::FindItemDefinitionByRepresentation(UClass* ItemClass) {
