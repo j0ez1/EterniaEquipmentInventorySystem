@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ETDAItemType.h"
 #include "Engine/DataAsset.h"
 #include "ETDAItemDefinition.generated.h"
 
-class UETDAItemType;
 class UGameplayEffect;
 /**
  * 
@@ -21,7 +21,7 @@ public:
 
 	FORCEINLINE FText GetItemName() const { return ItemName; }
 
-	FORCEINLINE UETDAItemType* GetType() const { return ItemType.LoadSynchronous(); }
+	FORCEINLINE UETDAItemType* GetType() const;
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE TSubclassOf<AActor> GetRepresentation() const { return Representation; }

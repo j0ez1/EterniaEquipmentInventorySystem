@@ -2,3 +2,7 @@
 
 
 #include "Data/ETDAItemDefinition.h"
+
+UETDAItemType* UETDAItemDefinition::GetType() const {
+	return ItemType.LoadSynchronous();
+}

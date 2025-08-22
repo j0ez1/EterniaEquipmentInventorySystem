@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ETDAEquipmentSlotType.h"
 #include "Engine/DataAsset.h"
 #include "ETDAItemType.generated.h"
 
-class UETDAEquipmentSlotType;
 /**
  * 
  */
@@ -17,10 +17,10 @@ class ETERNIAITEMS_API UETDAItemType : public UDataAsset {
 public:
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TArray<TSoftObjectPtr<UETDAEquipmentSlotType>> GetValidEquipmentSlotTypes() const { return ValidEquipmentSlotTypes; }
+	FORCEINLINE TArray<TSoftObjectPtr<UETDAEquipmentSlotType>> GetValidEquipmentSlotTypes() const;
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TArray<TSoftObjectPtr<UETDAEquipmentSlotType>> GetBlocksEquipmentSlotTypes() const { return BlocksEquipmentSlotTypes; }
+	FORCEINLINE TArray<TSoftObjectPtr<UETDAEquipmentSlotType>> GetBlocksEquipmentSlotTypes() const;
 
 	bool operator==(const UETDAItemType& Other) const { return Identifier == Other.Identifier; }
 

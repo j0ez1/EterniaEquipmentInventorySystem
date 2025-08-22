@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/ETDAItemType.h"
 #include "UObject/Object.h"
 #include "ETEquipmentSlot.generated.h"
 
+class UETDAItemType;
 class UETDAEquipmentSlotType;
-class IAbilitySystemInterface;
 class UInputAction;
 class UETItem;
 

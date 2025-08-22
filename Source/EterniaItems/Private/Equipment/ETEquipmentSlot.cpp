@@ -4,6 +4,7 @@
 #include "Equipment/ETEquipmentSlot.h"
 
 #include "Data/ETDAItemDefinition.h"
+#include "Data/ETDAItemType.h"
 #include "Items/ETItem.h"
 
 UETEquipmentSlot::UETEquipmentSlot(const FObjectInitializer& ObjectInitializer) :
