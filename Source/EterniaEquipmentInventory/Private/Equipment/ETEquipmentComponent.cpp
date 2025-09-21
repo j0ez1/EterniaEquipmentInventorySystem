@@ -39,7 +39,7 @@ bool UETEquipmentComponent::TryEquipItem(UETInventoryEntry* InventoryEntry, bool
 
 UETEquipmentSlot* UETEquipmentComponent::FindSlotByName(const FName& Name) const {
 	for (auto EquipmentSlot : Slots) {
-		if (EquipmentSlot->GetSlotName() == Name) {
+		if (ensure(EquipmentSlot) && EquipmentSlot->GetSlotName() == Name) {
 			return EquipmentSlot;
 		}
 	}
@@ -48,7 +48,7 @@ UETEquipmentSlot* UETEquipmentComponent::FindSlotByName(const FName& Name) const
 
 UETEquipmentSlot* UETEquipmentComponent::FindSlotByType(const FETEquipmentSlotType& SlotType) const {
 	for (auto EquipmentSlot : Slots) {
-		if (EquipmentSlot->GetType() == SlotType) {
+		if (ensure(EquipmentSlot) && EquipmentSlot->GetType() == SlotType) {
 			return EquipmentSlot;
 		}
 	}
@@ -58,7 +58,7 @@ UETEquipmentSlot* UETEquipmentComponent::FindSlotByType(const FETEquipmentSlotTy
 TArray<UETEquipmentSlot*> UETEquipmentComponent::FindAllValidSlotsForItemType(const FETItemType& ItemType) const {
 	TArray<UETEquipmentSlot*> ResultArray;
 	for (auto EquipmentSlot : Slots) {
-		if (EquipmentSlot->IsValidForItemType(ItemType)) {
+		if (ensure(EquipmentSlot) && EquipmentSlot->IsValidForItemType(ItemType)) {
 			ResultArray.Add(EquipmentSlot);
 		}
 	}
@@ -67,7 +67,7 @@ TArray<UETEquipmentSlot*> UETEquipmentComponent::FindAllValidSlotsForItemType(co
 
 UETEquipmentSlot* UETEquipmentComponent::FindSlotByInputAction(const UInputAction* InputAction) const {
 	for (auto EquipmentSlot : Slots) {
-		if (EquipmentSlot->GetInputAction() == InputAction) {
+		if (ensure(EquipmentSlot) && EquipmentSlot->GetInputAction() == InputAction) {
 			return EquipmentSlot;
 		}
 	}
@@ -78,6 +78,9 @@ void UETEquipmentComponent::BeginPlay() {
 	Super::BeginPlay();
 
 	for (auto Slot : Slots) {
+		if (!(ensure(Slot)))
+			continue;
+
 		Slot->OnEquippedItemChanged.AddDynamic(this, &UETEquipmentComponent::OnEquippedItemChanged_EquipmentSlot);
 	}
 }
@@ -85,6 +88,9 @@ void UETEquipmentComponent::BeginPlay() {
 void UETEquipmentComponent::UpdateSlotBlockState() {
 	TMap<FName, int32> BlockedSlotTypesMap;
 	for (UETEquipmentSlot* Slot : Slots) {
+		if (!(ensure(Slot)))
+			continue;
+
 		UETInventoryEntry* OccupyingItem = Slot->GetInventoryEntry();
 		if (OccupyingItem && OccupyingItem->GetDefinition()) {
 			TArray<FETEquipmentSlotType> SlotTypesToBlock = OccupyingItem->GetDefinition()->GetItemType().GetBlocksEquipmentSlotTypes();
@@ -99,7 +105,7 @@ void UETEquipmentComponent::UpdateSlotBlockState() {
 	}
 
 	for (UETEquipmentSlot* Slot : Slots) {
-		if (Slot->IsEmpty()) {
+		if (ensure(Slot) && Slot->IsEmpty()) {
 			if (BlockedSlotTypesMap.Contains(Slot->GetType().Identifier)) {
 				BlockedSlotTypesMap[Slot->GetType().Identifier]--;
 				if (BlockedSlotTypesMap[Slot->GetType().Identifier] <= 0) {
@@ -113,7 +119,7 @@ void UETEquipmentComponent::UpdateSlotBlockState() {
 	}
 
 	for (UETEquipmentSlot* Slot : Slots) {
-		if (!Slot->IsEmpty()) {
+		if (ensure(Slot) && !Slot->IsEmpty()) {
 			if (BlockedSlotTypesMap.Contains(Slot->GetType().Identifier)) {
 				BlockedSlotTypesMap[Slot->GetType().Identifier]--;
 				if (BlockedSlotTypesMap[Slot->GetType().Identifier] <= 0) {
