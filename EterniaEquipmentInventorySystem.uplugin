@@ -21,5 +21,14 @@
 			"LoadingPhase": "PreLoadingScreen"
 		}
 	],
-	"Plugins": []
+	"Plugins": [
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		}
+	]
 }

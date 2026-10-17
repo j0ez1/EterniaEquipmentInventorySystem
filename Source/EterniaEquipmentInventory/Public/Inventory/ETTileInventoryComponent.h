@@ -23,10 +23,10 @@ struct FInventoryTile {
 		, Y(TileY) {};
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 X;
+	int32 X = 0;
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 Y;
+	int32 Y = 0;
 
 	FIntPoint ToIntPoint() const {
 		return FIntPoint(X, Y);

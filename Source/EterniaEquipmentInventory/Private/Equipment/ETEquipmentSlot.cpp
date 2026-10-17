@@ -17,7 +17,7 @@ bool UETEquipmentSlot::TryEquipItem(UETInventoryEntry* NewItem, bool bForceEquip
 	}
 
 	UETInventoryEntry* OccupyingItem = InventoryEntry;
-	if (IsEmpty() || !InventoryEntry->IsSameItem(NewItem) && bForceEquip) {
+	if (IsEmpty() || (!InventoryEntry->IsSameItem(NewItem) && bForceEquip)) {
 		bool bSuccess = DoSetItem(NewItem);
 		RemainingItem = bSuccess ? OccupyingItem : NewItem;
 		return bSuccess;
